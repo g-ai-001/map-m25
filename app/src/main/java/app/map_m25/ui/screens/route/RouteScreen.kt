@@ -25,7 +25,7 @@ import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.DirectionsBike
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.automirrored.filled.SwapVert
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -200,7 +200,7 @@ private fun LocationSelector(
                 .background(MaterialTheme.colorScheme.surface, CircleShape)
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.SwapVert,
+                imageVector = Icons.Default.SwapHoriz,
                 contentDescription = "交换"
             )
         }
