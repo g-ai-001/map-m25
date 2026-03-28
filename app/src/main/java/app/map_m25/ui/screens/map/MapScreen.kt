@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.North
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
@@ -54,6 +56,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,24 +80,40 @@ fun MapScreen(
     var mapOffsetX by remember { mutableFloatStateOf(0f) }
     var mapOffsetY by remember { mutableFloatStateOf(0f) }
     var scale by remember { mutableFloatStateOf(1f) }
+    var rotation by remember { mutableFloatStateOf(0f) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
+                .graphicsLayer {
+                    rotationZ = rotation
+                }
                 .pointerInput(Unit) {
-                    detectTransformGestures { _, pan, zoom, _ ->
+                    detectTransformGestures { _, pan, zoom, rotationChange ->
                         scale = (scale * zoom).coerceIn(0.5f, 3f)
                         mapOffsetX += pan.x
                         mapOffsetY += pan.y
+                        rotation += rotationChange
+                        viewModel.onRotationChange(rotation)
                     }
                 }
                 .pointerInput(Unit) {
                     detectTapGestures { offset ->
+                        // Transform tap coordinates from rotated space to original space
+                        val centerX = size.width / 2f
+                        val centerY = size.height / 2f
+                        val angleRad = Math.toRadians(rotation.toDouble())
+                        val cosAngle = kotlin.math.cos(angleRad).toFloat()
+                        val sinAngle = kotlin.math.sin(angleRad).toFloat()
+
+                        val rotatedX = cosAngle * (offset.x - centerX) - sinAngle * (offset.y - centerY) + centerX
+                        val rotatedY = sinAngle * (offset.x - centerX) + cosAngle * (offset.y - centerY) + centerY
+
                         val lat = uiState.currentLocation.latitude +
-                            (offset.y - size.height / 2) / (100 * scale)
+                            (rotatedY - size.height / 2) / (100 * scale)
                         val lng = uiState.currentLocation.longitude +
-                            (offset.x - size.width / 2) / (100 * scale)
+                            (rotatedX - size.width / 2) / (100 * scale)
                         viewModel.onMapClick(lat, lng)
                     }
                 }
@@ -184,7 +203,9 @@ fun MapScreen(
 
             ZoomControls(
                 onZoomIn = { viewModel.onZoomChange((uiState.zoom + 1).coerceAtMost(20f)) },
-                onZoomOut = { viewModel.onZoomChange((uiState.zoom - 1).coerceAtLeast(5f)) }
+                onZoomOut = { viewModel.onZoomChange((uiState.zoom - 1).coerceAtLeast(5f)) },
+                rotation = rotation,
+                onResetRotation = { viewModel.resetRotation() }
             )
 
             ActionButtons(
@@ -252,7 +273,9 @@ private fun TopBar(
 @Composable
 private fun ZoomControls(
     onZoomIn: () -> Unit,
-    onZoomOut: () -> Unit
+    onZoomOut: () -> Unit,
+    rotation: Float = 0f,
+    onResetRotation: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -274,6 +297,22 @@ private fun ZoomControls(
             containerColor = MaterialTheme.colorScheme.surface
         ) {
             Icon(Icons.Default.Remove, contentDescription = "缩小")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        // Rotation indicator
+        if (rotation != 0f) {
+            FloatingActionButton(
+                onClick = onResetRotation,
+                modifier = Modifier.size(40.dp),
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.North,
+                    contentDescription = "重置旋转",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.graphicsLayer { rotationZ = -rotation }
+                )
+            }
         }
     }
 }

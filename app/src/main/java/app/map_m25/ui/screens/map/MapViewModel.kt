@@ -19,6 +19,7 @@ data class MapUiState(
         address = "北京市"
     ),
     val zoom: Float = 15f,
+    val rotation: Float = 0f,
     val isLocating: Boolean = false,
     val selectedLocation: MapLocation? = null,
     val showLocationInfo: Boolean = false
@@ -48,7 +49,15 @@ class MapViewModel @Inject constructor(
     }
 
     fun onZoomChange(zoom: Float) {
-        _uiState.value = _uiState.value.copy(zoom = zoom)
+        _uiState.value = _uiState.value.copy(zoom = zoom.coerceIn(5f, 20f))
+    }
+
+    fun onRotationChange(rotation: Float) {
+        _uiState.value = _uiState.value.copy(rotation = rotation % 360f)
+    }
+
+    fun resetRotation() {
+        _uiState.value = _uiState.value.copy(rotation = 0f)
     }
 
     fun startLocation() {
