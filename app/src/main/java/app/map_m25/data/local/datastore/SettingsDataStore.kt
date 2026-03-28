@@ -6,7 +6,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import app.map_m25.domain.model.MapLayer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -20,6 +22,7 @@ class SettingsDataStore(
         val MAP_ZOOM = floatPreferencesKey("map_zoom")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val HIGH_REFRESH_RATE = booleanPreferencesKey("high_refresh_rate")
+        val MAP_LAYER = stringPreferencesKey("map_layer")
     }
 
     val darkMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -36,6 +39,15 @@ class SettingsDataStore(
 
     val highRefreshRate: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[Keys.HIGH_REFRESH_RATE] ?: true
+    }
+
+    val mapLayer: Flow<MapLayer> = context.dataStore.data.map { prefs ->
+        val layerName = prefs[Keys.MAP_LAYER] ?: MapLayer.NORMAL.name
+        try {
+            MapLayer.valueOf(layerName)
+        } catch (e: IllegalArgumentException) {
+            MapLayer.NORMAL
+        }
     }
 
     suspend fun setDarkMode(enabled: Boolean) {
@@ -59,6 +71,12 @@ class SettingsDataStore(
     suspend fun setHighRefreshRate(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[Keys.HIGH_REFRESH_RATE] = enabled
+        }
+    }
+
+    suspend fun setMapLayer(layer: MapLayer) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.MAP_LAYER] = layer.name
         }
     }
 }

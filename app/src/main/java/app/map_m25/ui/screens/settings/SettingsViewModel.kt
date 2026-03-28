@@ -3,6 +3,7 @@ package app.map_m25.ui.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.map_m25.data.local.datastore.SettingsDataStore
+import app.map_m25.domain.model.MapLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,8 @@ data class SettingsUiState(
     val darkMode: Boolean = false,
     val mapZoom: Float = 15f,
     val keepScreenOn: Boolean = false,
-    val highRefreshRate: Boolean = true
+    val highRefreshRate: Boolean = true,
+    val mapLayer: MapLayer = MapLayer.NORMAL
 )
 
 @HiltViewModel
@@ -36,13 +38,15 @@ class SettingsViewModel @Inject constructor(
                 settingsDataStore.darkMode,
                 settingsDataStore.mapZoom,
                 settingsDataStore.keepScreenOn,
-                settingsDataStore.highRefreshRate
-            ) { darkMode, mapZoom, keepScreenOn, highRefreshRate ->
+                settingsDataStore.highRefreshRate,
+                settingsDataStore.mapLayer
+            ) { darkMode, mapZoom, keepScreenOn, highRefreshRate, mapLayer ->
                 SettingsUiState(
                     darkMode = darkMode,
                     mapZoom = mapZoom,
                     keepScreenOn = keepScreenOn,
-                    highRefreshRate = highRefreshRate
+                    highRefreshRate = highRefreshRate,
+                    mapLayer = mapLayer
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -71,6 +75,12 @@ class SettingsViewModel @Inject constructor(
     fun setHighRefreshRate(enabled: Boolean) {
         viewModelScope.launch {
             settingsDataStore.setHighRefreshRate(enabled)
+        }
+    }
+
+    fun setMapLayer(layer: MapLayer) {
+        viewModelScope.launch {
+            settingsDataStore.setMapLayer(layer)
         }
     }
 }

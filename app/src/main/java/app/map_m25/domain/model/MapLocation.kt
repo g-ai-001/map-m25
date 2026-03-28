@@ -19,3 +19,9 @@ enum class LocationCategory {
     TRANSPORT,
     OTHER
 }
+
+enum class MapLayer {
+    NORMAL,
+    SATELLITE,
+    TERRAIN
+}

@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.ScreenLockPortrait
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.ZoomIn
@@ -26,6 +29,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -39,9 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.map_m25.BuildConfig
+import app.map_m25.domain.model.MapLayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,6 +119,13 @@ fun SettingsScreen(
                     value = uiState.mapZoom,
                     valueRange = 5f..20f,
                     onValueChange = viewModel::setMapZoom
+                )
+                HorizontalDivider()
+                MapLayerSettingItem(
+                    icon = Icons.Default.Layers,
+                    title = "地图图层",
+                    currentLayer = uiState.mapLayer,
+                    onLayerSelected = viewModel::setMapLayer
                 )
             }
 
@@ -311,5 +324,67 @@ private fun InfoSettingItem(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun MapLayerSettingItem(
+    icon: ImageVector,
+    title: String,
+    currentLayer: MapLayer,
+    onLayerSelected: (MapLayer) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        Column(
+            modifier = Modifier
+                .padding(start = 40.dp, top = 8.dp)
+                .selectableGroup()
+        ) {
+            MapLayer.entries.forEach { layer ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = currentLayer == layer,
+                            onClick = { onLayerSelected(layer) },
+                            role = Role.RadioButton
+                        )
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = currentLayer == layer,
+                        onClick = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = when (layer) {
+                            MapLayer.NORMAL -> "普通地图"
+                            MapLayer.SATELLITE -> "卫星地图"
+                            MapLayer.TERRAIN -> "地形地图"
+                        },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
     }
 }
