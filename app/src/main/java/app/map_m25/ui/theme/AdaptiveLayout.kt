@@ -1,6 +1,7 @@
 package app.map_m25.ui.theme
 
 import android.app.Activity
+import android.graphics.Point
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -27,24 +28,26 @@ fun rememberAdaptiveLayoutInfo(): AdaptiveLayoutInfo {
     val context = LocalContext.current
     val activity = context as? Activity
 
-    return remember(activity) {
-        val windowSizeClass = activity?.let { calculateWindowSizeClass(it) }
-        val widthSizeClass = windowSizeClass?.widthSizeClass ?: WindowWidthSizeClass.Compact
+    val windowSizeClass = activity?.let { calculateWindowSizeClass(it) }
+    val widthSizeClass = windowSizeClass?.widthSizeClass ?: WindowWidthSizeClass.Compact
 
-        val deviceType = when (widthSizeClass) {
-            WindowWidthSizeClass.Compact -> DeviceType.PHONE
-            WindowWidthSizeClass.Medium -> DeviceType.FOLDABLE
-            WindowWidthSizeClass.Expanded -> DeviceType.TABLET
-            else -> DeviceType.PHONE
-        }
+    val deviceType = when (widthSizeClass) {
+        WindowWidthSizeClass.Compact -> DeviceType.PHONE
+        WindowWidthSizeClass.Medium -> DeviceType.FOLDABLE
+        WindowWidthSizeClass.Expanded -> DeviceType.TABLET
+        else -> DeviceType.PHONE
+    }
 
-        val isLandscape = activity?.let {
+    val isLandscape = remember(activity) {
+        activity?.let {
             val display = it.windowManager.defaultDisplay
-            val size = android.graphics.Point()
+            val size = Point()
             display.getSize(size)
             size.x > size.y
         } ?: false
+    }
 
+    return remember(deviceType, isLandscape) {
         AdaptiveLayoutInfo(
             deviceType = deviceType,
             isLandscape = isLandscape,

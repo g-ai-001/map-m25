@@ -13,7 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.History
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ScreenLockPortrait
@@ -80,7 +80,7 @@ fun SettingsScreen(
         ) {
             SettingsSection(title = "数据管理") {
                 ClickableSettingItem(
-                    icon = Icons.AutoMirrored.Filled.History,
+                    icon = Icons.Default.History,
                     title = "搜索历史",
                     description = "查看和管理搜索记录",
                     onClick = onNavigateToHistory
