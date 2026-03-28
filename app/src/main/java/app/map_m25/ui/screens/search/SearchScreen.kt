@@ -132,10 +132,7 @@ private fun SearchTopBar(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        TextButton(onClick = {
-            onSearchSubmit()
-            focusManager.clearFocus()
-        }) {
+        TextButton(onClick = onSearchSubmit) {
             Text("搜索", color = Color.White)
         }
     }

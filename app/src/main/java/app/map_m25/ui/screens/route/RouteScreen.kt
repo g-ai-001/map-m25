@@ -19,10 +19,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.DirectionsCar
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.automirrored.filled.SwapVert
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.DirectionsBike
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
@@ -260,7 +260,7 @@ private fun RouteTypeSelector(
     ) {
         RouteTypeChip(
             type = RouteType.DRIVING,
-            icon = Icons.AutoMirrored.Filled.DirectionsCar,
+            icon = Icons.Filled.Directions,
             label = "驾车",
             isSelected = selectedType == RouteType.DRIVING,
             onClick = { onTypeSelected(RouteType.DRIVING) },

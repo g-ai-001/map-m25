@@ -256,9 +256,9 @@ private fun ZoomControls(
 ) {
     Column(
         modifier = Modifier
-            .align(Alignment.CenterEnd)
+            .fillMaxWidth()
             .padding(end = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.End
     ) {
         FloatingActionButton(
             onClick = onZoomIn,
