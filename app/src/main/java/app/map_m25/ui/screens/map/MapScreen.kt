@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Straighten
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
@@ -196,13 +196,13 @@ fun MapScreen(
                     val y1 = centerY + (p1.latitude - uiState.currentLocation.latitude) * 100 * scale
                     val x2 = centerX + (p2.longitude - uiState.currentLocation.longitude) * 100 * scale
                     val y2 = centerY + (p2.latitude - uiState.currentLocation.latitude) * 100 * scale
-                    drawLine(measureColor, Offset(x1, y1), Offset(x2, y2), measureStrokeWidth)
+                    drawLine(measureColor, Offset(x1.toFloat(), y1.toFloat()), Offset(x2.toFloat(), y2.toFloat()), measureStrokeWidth)
                 }
 
                 uiState.measurePoints.forEach { point ->
                     val x = centerX + (point.longitude - uiState.currentLocation.longitude) * 100 * scale
                     val y = centerY + (point.latitude - uiState.currentLocation.latitude) * 100 * scale
-                    drawCircle(Color.Red, 8f * scale, Offset(x, y))
+                    drawCircle(Color.Red, 8f * scale, Offset(x.toFloat(), y.toFloat()))
                 }
             }
 
@@ -528,7 +528,7 @@ private fun ActionButtons(
             isActive = isLocating
         )
         ActionButton(
-            icon = Icons.AutoMirrored.Filled.Straighten,
+            icon = Icons.Filled.Straighten,
             label = "测量",
             onClick = onMeasureClick,
             isActive = isMeasuring
