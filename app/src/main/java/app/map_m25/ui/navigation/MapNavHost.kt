@@ -31,7 +31,7 @@ fun MapNavHost(
         composable(Screen.Search.route) {
             SearchScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onLocationSelected = { navController.popBackStack() }
+                onLocationSelected = { _ -> navController.popBackStack() }
             )
         }
         composable(Screen.Favorites.route) {
