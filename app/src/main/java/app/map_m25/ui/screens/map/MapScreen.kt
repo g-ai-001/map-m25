@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.North
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
@@ -307,7 +306,7 @@ private fun ZoomControls(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.North,
+                    imageVector = Icons.Default.Navigation,
                     contentDescription = "重置旋转",
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.graphicsLayer { rotationZ = -rotation }
