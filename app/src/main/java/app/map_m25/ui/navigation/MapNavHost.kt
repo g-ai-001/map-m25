@@ -8,9 +8,11 @@ import androidx.navigation.compose.rememberNavController
 import app.map_m25.ui.screens.favorites.FavoritesScreen
 import app.map_m25.ui.screens.history.HistoryScreen
 import app.map_m25.ui.screens.map.MapScreen
+import app.map_m25.ui.screens.markers.MarkersScreen
 import app.map_m25.ui.screens.route.RouteScreen
 import app.map_m25.ui.screens.search.SearchScreen
 import app.map_m25.ui.screens.settings.SettingsScreen
+import app.map_m25.ui.screens.tracks.TracksScreen
 
 @Composable
 fun MapNavHost(
@@ -25,7 +27,9 @@ fun MapNavHost(
                 onNavigateToSearch = { navController.navigate(Screen.Search.route) },
                 onNavigateToFavorites = { navController.navigate(Screen.Favorites.route) },
                 onNavigateToRoute = { navController.navigate(Screen.Route.route) },
-                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onNavigateToMarkers = { navController.navigate(Screen.Markers.route) },
+                onNavigateToTracks = { navController.navigate(Screen.Tracks.route) }
             )
         }
         composable(Screen.Search.route) {
@@ -53,6 +57,16 @@ fun MapNavHost(
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToHistory = { navController.navigate(Screen.History.route) }
+            )
+        }
+        composable(Screen.Markers.route) {
+            MarkersScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Tracks.route) {
+            TracksScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

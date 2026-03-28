@@ -4,12 +4,18 @@ import android.content.Context
 import androidx.room.Room
 import app.map_m25.data.local.MapDatabase
 import app.map_m25.data.local.dao.LocationDao
+import app.map_m25.data.local.dao.MarkerDao
 import app.map_m25.data.local.dao.SearchHistoryDao
+import app.map_m25.data.local.dao.TrackDao
 import app.map_m25.data.local.datastore.SettingsDataStore
 import app.map_m25.data.repository.LocationRepositoryImpl
+import app.map_m25.data.repository.MarkerRepositoryImpl
 import app.map_m25.data.repository.SearchHistoryRepositoryImpl
+import app.map_m25.data.repository.TrackRepositoryImpl
 import app.map_m25.domain.repository.LocationRepository
+import app.map_m25.domain.repository.MarkerRepository
 import app.map_m25.domain.repository.SearchHistoryRepository
+import app.map_m25.domain.repository.TrackRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,6 +51,18 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideMarkerDao(database: MapDatabase): MarkerDao {
+        return database.markerDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTrackDao(database: MapDatabase): TrackDao {
+        return database.trackDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideSettingsDataStore(@ApplicationContext context: Context): SettingsDataStore {
         return SettingsDataStore(context)
     }
@@ -59,5 +77,17 @@ object AppModule {
     @Singleton
     fun provideSearchHistoryRepository(searchHistoryDao: SearchHistoryDao): SearchHistoryRepository {
         return SearchHistoryRepositoryImpl(searchHistoryDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMarkerRepository(markerDao: MarkerDao): MarkerRepository {
+        return MarkerRepositoryImpl(markerDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTrackRepository(trackDao: TrackDao): TrackRepository {
+        return TrackRepositoryImpl(trackDao)
     }
 }

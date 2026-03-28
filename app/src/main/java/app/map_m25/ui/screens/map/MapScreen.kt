@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.map_m25.domain.model.MapLayer
 import app.map_m25.domain.model.MapLocation
+import app.map_m25.domain.model.MapMarker
 import app.map_m25.ui.theme.MapGreen
 import kotlin.math.cos
 import kotlin.math.sin
@@ -81,6 +82,8 @@ fun MapScreen(
     onNavigateToFavorites: () -> Unit,
     onNavigateToRoute: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToMarkers: () -> Unit,
+    onNavigateToTracks: () -> Unit,
     viewModel: MapViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -206,6 +209,21 @@ fun MapScreen(
                 }
             }
 
+            uiState.markers.forEach { marker ->
+                val markerX = centerX + (marker.longitude - uiState.currentLocation.longitude) * 100 * scale
+                val markerY = centerY + (marker.latitude - uiState.currentLocation.latitude) * 100 * scale
+                drawCircle(
+                    color = Color(marker.color),
+                    radius = 12f * scale,
+                    center = Offset(markerX.toFloat(), markerY.toFloat())
+                )
+                drawCircle(
+                    color = Color.White,
+                    radius = 6f * scale,
+                    center = Offset(markerX.toFloat(), markerY.toFloat())
+                )
+            }
+
             val markerX = centerX
             val markerY = centerY
 
@@ -281,6 +299,8 @@ fun MapScreen(
                 onLocateClick = { viewModel.startLocation() },
                 onFavoritesClick = onNavigateToFavorites,
                 onRouteClick = onNavigateToRoute,
+                onMarkerClick = onNavigateToMarkers,
+                onTrackClick = onNavigateToTracks,
                 isLocating = uiState.isLocating,
                 onMeasureClick = {
                     if (uiState.isMeasuring) {
@@ -289,7 +309,15 @@ fun MapScreen(
                         viewModel.startMeasuring()
                     }
                 },
-                isMeasuring = uiState.isMeasuring
+                isMeasuring = uiState.isMeasuring,
+                onAddMarkerClick = {
+                    if (uiState.isAddingMarker) {
+                        viewModel.cancelAddingMarker()
+                    } else {
+                        viewModel.startAddingMarker()
+                    }
+                },
+                isAddingMarker = uiState.isAddingMarker
             )
 
             if (uiState.isMeasuring) {
@@ -511,38 +539,79 @@ private fun ActionButtons(
     onLocateClick: () -> Unit,
     onFavoritesClick: () -> Unit,
     onRouteClick: () -> Unit,
+    onMarkerClick: () -> Unit,
+    onTrackClick: () -> Unit,
     isLocating: Boolean,
     onMeasureClick: () -> Unit,
-    isMeasuring: Boolean
+    isMeasuring: Boolean,
+    onAddMarkerClick: () -> Unit,
+    isAddingMarker: Boolean
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        ActionButton(
-            icon = Icons.Default.MyLocation,
-            label = "定位",
-            onClick = onLocateClick,
-            isActive = isLocating
-        )
-        ActionButton(
-            icon = Icons.Filled.Straighten,
-            label = "测量",
-            onClick = onMeasureClick,
-            isActive = isMeasuring
-        )
-        ActionButton(
-            icon = Icons.Default.Star,
-            label = "收藏",
-            onClick = onFavoritesClick
-        )
-        ActionButton(
-            icon = Icons.Default.Route,
-            label = "路线",
-            onClick = onRouteClick
-        )
+    Column {
+        if (isAddingMarker) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "点击地图添加标记",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    IconButton(onClick = onAddMarkerClick) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "取消",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            ActionButton(
+                icon = Icons.Default.MyLocation,
+                label = "定位",
+                onClick = onLocateClick,
+                isActive = isLocating
+            )
+            ActionButton(
+                icon = Icons.Default.Star,
+                label = "标记",
+                onClick = onMarkerClick
+            )
+            ActionButton(
+                icon = Icons.Default.Route,
+                label = "轨迹",
+                onClick = onTrackClick
+            )
+            ActionButton(
+                icon = Icons.Filled.Straighten,
+                label = "测量",
+                onClick = onMeasureClick,
+                isActive = isMeasuring
+            )
+            ActionButton(
+                icon = if (isAddingMarker) Icons.Default.Clear else Icons.Default.Add,
+                label = "添标记",
+                onClick = onAddMarkerClick,
+                isActive = isAddingMarker
+            )
+        }
     }
 }
 

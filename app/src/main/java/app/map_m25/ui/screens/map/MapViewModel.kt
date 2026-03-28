@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.map_m25.domain.model.MapLayer
 import app.map_m25.domain.model.MapLocation
+import app.map_m25.domain.model.MapMarker
 import app.map_m25.domain.repository.LocationRepository
+import app.map_m25.domain.repository.MarkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,16 +31,31 @@ data class MapUiState(
     val showScaleBar: Boolean = true,
     val isMeasuring: Boolean = false,
     val measurePoints: List<MapLocation> = emptyList(),
-    val totalDistance: Float = 0f
+    val totalDistance: Float = 0f,
+    val markers: List<MapMarker> = emptyList(),
+    val isAddingMarker: Boolean = false
 )
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val markerRepository: MarkerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
+
+    init {
+        loadMarkers()
+    }
+
+    private fun loadMarkers() {
+        viewModelScope.launch {
+            markerRepository.getAllMarkers().collect { markers ->
+                _uiState.value = _uiState.value.copy(markers = markers)
+            }
+        }
+    }
 
     fun onMapClick(latitude: Double, longitude: Double) {
         viewModelScope.launch {
@@ -55,6 +72,16 @@ class MapViewModel @Inject constructor(
                     measurePoints = newPoints,
                     totalDistance = newDistance
                 )
+            } else if (_uiState.value.isAddingMarker) {
+                val markerName = "标记 ${_uiState.value.markers.size + 1}"
+                val marker = MapMarker(
+                    name = markerName,
+                    latitude = latitude,
+                    longitude = longitude,
+                    color = 0xFFFF5722.toInt()
+                )
+                markerRepository.saveMarker(marker)
+                _uiState.value = _uiState.value.copy(isAddingMarker = false)
             } else {
                 _uiState.value = _uiState.value.copy(
                     selectedLocation = location,
@@ -136,7 +163,8 @@ class MapViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             isMeasuring = true,
             measurePoints = emptyList(),
-            totalDistance = 0f
+            totalDistance = 0f,
+            isAddingMarker = false
         )
     }
 
@@ -153,5 +181,22 @@ class MapViewModel @Inject constructor(
             measurePoints = emptyList(),
             totalDistance = 0f
         )
+    }
+
+    fun startAddingMarker() {
+        _uiState.value = _uiState.value.copy(
+            isAddingMarker = true,
+            isMeasuring = false
+        )
+    }
+
+    fun cancelAddingMarker() {
+        _uiState.value = _uiState.value.copy(isAddingMarker = false)
+    }
+
+    fun deleteMarker(markerId: Long) {
+        viewModelScope.launch {
+            markerRepository.deleteMarker(markerId)
+        }
     }
 }
