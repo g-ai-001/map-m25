@@ -87,6 +87,8 @@ fun MapScreen(
                 .fillMaxSize()
                 .graphicsLayer {
                     rotationZ = rotation
+                    // Enable high quality rendering for smooth animations
+                    compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
                 }
                 .pointerInput(Unit) {
                     detectTransformGestures { _, pan, zoom, rotationChange ->

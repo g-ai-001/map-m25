@@ -19,6 +19,7 @@ class SettingsDataStore(
         val DARK_MODE = booleanPreferencesKey("dark_mode")
         val MAP_ZOOM = floatPreferencesKey("map_zoom")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val HIGH_REFRESH_RATE = booleanPreferencesKey("high_refresh_rate")
     }
 
     val darkMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -31,6 +32,10 @@ class SettingsDataStore(
 
     val keepScreenOn: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[Keys.KEEP_SCREEN_ON] ?: false
+    }
+
+    val highRefreshRate: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.HIGH_REFRESH_RATE] ?: true
     }
 
     suspend fun setDarkMode(enabled: Boolean) {
@@ -48,6 +53,12 @@ class SettingsDataStore(
     suspend fun setKeepScreenOn(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[Keys.KEEP_SCREEN_ON] = enabled
+        }
+    }
+
+    suspend fun setHighRefreshRate(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.HIGH_REFRESH_RATE] = enabled
         }
     }
 }

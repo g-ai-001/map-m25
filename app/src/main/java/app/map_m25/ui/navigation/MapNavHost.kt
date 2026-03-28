@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.map_m25.ui.screens.favorites.FavoritesScreen
+import app.map_m25.ui.screens.history.HistoryScreen
 import app.map_m25.ui.screens.map.MapScreen
 import app.map_m25.ui.screens.route.RouteScreen
 import app.map_m25.ui.screens.search.SearchScreen
@@ -38,6 +39,11 @@ fun MapNavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
+        composable(Screen.History.route) {
+            HistoryScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
         composable(Screen.Route.route) {
             RouteScreen(
                 onNavigateBack = { navController.popBackStack() }
@@ -45,7 +51,8 @@ fun MapNavHost(
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHistory = { navController.navigate(Screen.History.route) }
             )
         }
     }

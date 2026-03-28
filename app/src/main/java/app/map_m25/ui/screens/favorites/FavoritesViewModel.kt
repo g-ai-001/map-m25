@@ -13,7 +13,8 @@ import javax.inject.Inject
 
 data class FavoritesUiState(
     val favorites: List<MapLocation> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val sortOrder: SortOrder = SortOrder.TIME_DESC
 )
 
 @HiltViewModel
@@ -24,6 +25,8 @@ class FavoritesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(FavoritesUiState())
     val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
 
+    private var allFavorites: List<MapLocation> = emptyList()
+
     init {
         loadFavorites()
     }
@@ -31,12 +34,29 @@ class FavoritesViewModel @Inject constructor(
     private fun loadFavorites() {
         viewModelScope.launch {
             locationRepository.getFavoriteLocations().collect { favorites ->
-                _uiState.value = FavoritesUiState(
-                    favorites = favorites,
+                allFavorites = favorites
+                _uiState.value = _uiState.value.copy(
+                    favorites = sortFavorites(favorites, _uiState.value.sortOrder),
                     isLoading = false
                 )
             }
         }
+    }
+
+    private fun sortFavorites(favorites: List<MapLocation>, sortOrder: SortOrder): List<MapLocation> {
+        return when (sortOrder) {
+            SortOrder.NAME_ASC -> favorites.sortedBy { it.name.lowercase() }
+            SortOrder.NAME_DESC -> favorites.sortedByDescending { it.name.lowercase() }
+            SortOrder.TIME_ASC -> favorites.sortedBy { it.id }
+            SortOrder.TIME_DESC -> favorites.sortedByDescending { it.id }
+        }
+    }
+
+    fun setSortOrder(sortOrder: SortOrder) {
+        _uiState.value = _uiState.value.copy(
+            sortOrder = sortOrder,
+            favorites = sortFavorites(allFavorites, sortOrder)
+        )
     }
 
     fun removeFavorite(location: MapLocation) {

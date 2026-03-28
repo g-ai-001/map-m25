@@ -1,5 +1,6 @@
 package app.map_m25.ui.screens.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,9 +13,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.History
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ScreenLockPortrait
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,11 +41,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.map_m25.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,6 +78,17 @@ fun SettingsScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
+            SettingsSection(title = "数据管理") {
+                ClickableSettingItem(
+                    icon = Icons.AutoMirrored.Filled.History,
+                    title = "搜索历史",
+                    description = "查看和管理搜索记录",
+                    onClick = onNavigateToHistory
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             SettingsSection(title = "显示设置") {
                 SwitchSettingItem(
                     icon = Icons.Default.DarkMode,
@@ -80,6 +96,14 @@ fun SettingsScreen(
                     description = "启用深色主题",
                     checked = uiState.darkMode,
                     onCheckedChange = viewModel::setDarkMode
+                )
+                HorizontalDivider()
+                SwitchSettingItem(
+                    icon = Icons.Default.Speed,
+                    title = "高刷新率模式",
+                    description = "启用120Hz流畅体验",
+                    checked = uiState.highRefreshRate,
+                    onCheckedChange = viewModel::setHighRefreshRate
                 )
                 HorizontalDivider()
                 SliderSettingItem(
@@ -110,7 +134,7 @@ fun SettingsScreen(
                 InfoSettingItem(
                     icon = Icons.Default.Info,
                     title = "版本信息",
-                    value = "0.1.0"
+                    value = BuildConfig.VERSION_NAME
                 )
             }
         }
@@ -222,6 +246,40 @@ private fun SliderSettingItem(
             valueRange = valueRange,
             modifier = Modifier.padding(top = 8.dp)
         )
+    }
+}
+
+@Composable
+private fun ClickableSettingItem(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

@@ -14,7 +14,8 @@ import javax.inject.Inject
 data class SettingsUiState(
     val darkMode: Boolean = false,
     val mapZoom: Float = 15f,
-    val keepScreenOn: Boolean = false
+    val keepScreenOn: Boolean = false,
+    val highRefreshRate: Boolean = true
 )
 
 @HiltViewModel
@@ -34,12 +35,14 @@ class SettingsViewModel @Inject constructor(
             combine(
                 settingsDataStore.darkMode,
                 settingsDataStore.mapZoom,
-                settingsDataStore.keepScreenOn
-            ) { darkMode, mapZoom, keepScreenOn ->
+                settingsDataStore.keepScreenOn,
+                settingsDataStore.highRefreshRate
+            ) { darkMode, mapZoom, keepScreenOn, highRefreshRate ->
                 SettingsUiState(
                     darkMode = darkMode,
                     mapZoom = mapZoom,
-                    keepScreenOn = keepScreenOn
+                    keepScreenOn = keepScreenOn,
+                    highRefreshRate = highRefreshRate
                 )
             }.collect { state ->
                 _uiState.value = state
@@ -62,6 +65,12 @@ class SettingsViewModel @Inject constructor(
     fun setKeepScreenOn(enabled: Boolean) {
         viewModelScope.launch {
             settingsDataStore.setKeepScreenOn(enabled)
+        }
+    }
+
+    fun setHighRefreshRate(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsDataStore.setHighRefreshRate(enabled)
         }
     }
 }
