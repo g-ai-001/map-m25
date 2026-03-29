@@ -13,8 +13,8 @@ android {
         applicationId = "app.map_m25"
         minSdk = 36
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.8.1"
+        versionCode = 6
+        versionName = "0.9.0"
 
         vectorDrawables {
             useSupportLibrary = true

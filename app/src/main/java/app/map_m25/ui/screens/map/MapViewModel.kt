@@ -8,14 +8,21 @@ import app.map_m25.domain.model.MapLayer
 import app.map_m25.domain.model.MapLocation
 import app.map_m25.domain.model.MapMarker
 import app.map_m25.domain.model.MapStyle
+import app.map_m25.domain.model.RouteType
 import app.map_m25.domain.repository.LocationRepository
 import app.map_m25.domain.repository.MarkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 data class MapUiState(
     val currentLocation: MapLocation = MapLocation(
@@ -39,7 +46,8 @@ data class MapUiState(
     val totalDistance: Float = 0f,
     val markers: List<MapMarker> = emptyList(),
     val isAddingMarker: Boolean = false,
-    val voiceEnabled: Boolean = true
+    val voiceEnabled: Boolean = true,
+    val navigationState: NavigationState = NavigationState()
 )
 
 @HiltViewModel
@@ -247,6 +255,145 @@ class MapViewModel @Inject constructor(
     fun deleteMarker(markerId: Long) {
         viewModelScope.launch {
             markerRepository.deleteMarker(markerId)
+        }
+    }
+
+    fun startNavigation(routeType: RouteType = RouteType.DRIVING) {
+        _uiState.value = _uiState.value.copy(
+            navigationState = NavigationState(
+                isNavigating = true,
+                isSimulation = false,
+                isDeviated = false,
+                routeType = routeType,
+                remainingDistance = "5.2公里",
+                remainingTime = "15分钟",
+                currentInstruction = "前方直行",
+                nextRoadName = "中关村大街"
+            )
+        )
+        checkDeviation()
+    }
+
+    fun startSimulationNavigation(routeType: RouteType = RouteType.DRIVING) {
+        _uiState.value = _uiState.value.copy(
+            navigationState = NavigationState(
+                isNavigating = true,
+                isSimulation = true,
+                isDeviated = false,
+                routeType = routeType,
+                remainingDistance = "5.2公里",
+                remainingTime = "15分钟",
+                currentInstruction = "前方直行",
+                nextRoadName = "中关村大街"
+            )
+        )
+        startSimulation()
+    }
+
+    fun stopNavigation() {
+        simulationJob?.cancel()
+        simulationJob = null
+        _uiState.value = _uiState.value.copy(
+            navigationState = NavigationState()
+        )
+    }
+
+    fun toggleSimulation() {
+        val currentNav = _uiState.value.navigationState
+        if (currentNav.isSimulation) {
+            simulationJob?.cancel()
+            simulationJob = null
+            _uiState.value = _uiState.value.copy(
+                navigationState = currentNav.copy(isSimulation = false)
+            )
+        } else {
+            startSimulationNavigation(currentNav.routeType)
+        }
+    }
+
+    private var simulationJob: Job? = null
+
+    private fun startSimulation() {
+        simulationJob?.cancel()
+        simulationJob = viewModelScope.launch {
+            var remainingDist = 5.2f
+            var remainingTime = 15
+            val routeType = _uiState.value.navigationState.routeType
+            val instructions = listOf(
+                "前方直行" to TurnDirection.STRAIGHT to "中关村大街",
+                "前方左转" to TurnDirection.LEFT to "科学院南路",
+                "前方右转" to TurnDirection.RIGHT to "知春路",
+                "前方直行" to TurnDirection.STRAIGHT to "知春路",
+                "前方靠左" to TurnDirection.SLIGHT_LEFT to "北四环西路",
+                "前方靠右" to TurnDirection.SLIGHT_RIGHT to "中关村一号",
+                "前方掉头" to TurnDirection.U_TURN to "中关村一号"
+            )
+            var stepIndex = 0
+
+            while (remainingDist > 0 && _uiState.value.navigationState.isSimulation) {
+                delay(2000)
+                remainingDist = (remainingDist - 0.3f).coerceAtLeast(0f)
+                remainingTime = (remainingTime - 1).coerceAtLeast(0)
+
+                if (stepIndex < instructions.size && remainingDist < 4.0f - stepIndex * 0.5f) {
+                    val (instruction, turn) = instructions[stepIndex]
+                    stepIndex++
+                    _uiState.value = _uiState.value.copy(
+                        navigationState = _uiState.value.navigationState.copy(
+                            currentInstruction = instruction,
+                            nextTurnDirection = turn,
+                            nextRoadName = ""
+                        )
+                    )
+                }
+
+                _uiState.value = _uiState.value.copy(
+                    navigationState = _uiState.value.navigationState.copy(
+                        remainingDistance = formatDistance(remainingDist),
+                        remainingTime = "${remainingTime}分钟"
+                    )
+                )
+            }
+
+            if (_uiState.value.navigationState.isSimulation) {
+                _uiState.value = _uiState.value.copy(
+                    navigationState = _uiState.value.navigationState.copy(
+                        currentInstruction = "到达目的地",
+                        remainingDistance = "0公里",
+                        remainingTime = "0分钟"
+                    )
+                )
+            }
+        }
+    }
+
+    private fun formatDistance(km: Float): String {
+        return if (km >= 1) {
+            String.format("%.1f公里", km)
+        } else {
+            String.format("%.0f米", km * 1000)
+        }
+    }
+
+    private fun checkDeviation() {
+        viewModelScope.launch {
+            while (_uiState.value.navigationState.isNavigating) {
+                delay(3000)
+                val navState = _uiState.value.navigationState
+                if (!navState.isNavigating) break
+
+                val deviation = (Math.random() * 100).toInt() % 10
+                val isDeviated = deviation < 2
+
+                if (isDeviated != navState.isDeviated) {
+                    _uiState.value = _uiState.value.copy(
+                        navigationState = navState.copy(
+                            isDeviated = isDeviated,
+                            currentInstruction = if (isDeviated) "您已偏离路线" else "正在重新规划路线"
+                        )
+                    )
+                }
+            }
         }
     }
 }

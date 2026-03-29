@@ -280,6 +280,12 @@ fun MapScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
+            NavigationPanel(
+                navigationState = uiState.navigationState,
+                onClose = { viewModel.stopNavigation() },
+                onSimulationToggle = { viewModel.toggleSimulation() }
+            )
+
             TopBar(
                 onSearchClick = onNavigateToSearch,
                 onSettingsClick = onNavigateToSettings,

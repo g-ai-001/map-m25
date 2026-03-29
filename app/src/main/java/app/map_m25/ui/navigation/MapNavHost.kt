@@ -1,6 +1,7 @@
 package app.map_m25.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,9 +11,11 @@ import app.map_m25.ui.screens.favorites.FavoritesScreen
 import app.map_m25.ui.screens.history.HistoryScreen
 import app.map_m25.ui.screens.hotspots.HotSpotsScreen
 import app.map_m25.ui.screens.map.MapScreen
+import app.map_m25.ui.screens.map.MapViewModel
 import app.map_m25.ui.screens.markers.MarkersScreen
 import app.map_m25.ui.screens.offline.OfflineRegionsScreen
 import app.map_m25.ui.screens.route.RouteScreen
+import app.map_m25.ui.screens.route.RouteType
 import app.map_m25.ui.screens.search.SearchScreen
 import app.map_m25.ui.screens.settings.SettingsScreen
 import app.map_m25.ui.screens.snapshot.MapSnapshotsScreen
@@ -28,14 +31,19 @@ fun MapNavHost(
         navController = navController,
         startDestination = Screen.Map.route
     ) {
-        composable(Screen.Map.route) {
+        composable(Screen.Map.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Map.route)
+            }
+            val mapViewModel: MapViewModel = androidx.hilt.navigation.compose.hiltViewModel(parentEntry)
             MapScreen(
                 onNavigateToSearch = { navController.navigate(Screen.Search.route) },
                 onNavigateToFavorites = { navController.navigate(Screen.Favorites.route) },
                 onNavigateToRoute = { navController.navigate(Screen.Route.route) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                 onNavigateToMarkers = { navController.navigate(Screen.Markers.route) },
-                onNavigateToTracks = { navController.navigate(Screen.Tracks.route) }
+                onNavigateToTracks = { navController.navigate(Screen.Tracks.route) },
+                viewModel = mapViewModel
             )
         }
         composable(Screen.Search.route) {
@@ -56,7 +64,19 @@ fun MapNavHost(
         }
         composable(Screen.Route.route) {
             RouteScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onStartNavigation = { routeType ->
+                    val parentEntry = navController.getBackStackEntry(Screen.Map.route)
+                    val mapViewModel: MapViewModel = androidx.hilt.navigation.compose.hiltViewModel(parentEntry)
+                    mapViewModel.startNavigation(routeType)
+                    navController.popBackStack()
+                },
+                onStartSimulation = { routeType ->
+                    val parentEntry = navController.getBackStackEntry(Screen.Map.route)
+                    val mapViewModel: MapViewModel = androidx.hilt.navigation.compose.hiltViewModel(parentEntry)
+                    mapViewModel.startSimulationNavigation(routeType)
+                    navController.popBackStack()
+                }
             )
         }
         composable(Screen.Settings.route) {

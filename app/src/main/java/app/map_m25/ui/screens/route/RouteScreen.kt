@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.DirectionsBike
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -64,6 +65,8 @@ import app.map_m25.ui.theme.RouteOrange
 @Composable
 fun RouteScreen(
     onNavigateBack: () -> Unit,
+    onStartNavigation: (RouteType) -> Unit,
+    onStartSimulation: (RouteType) -> Unit,
     viewModel: RouteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -125,12 +128,34 @@ fun RouteScreen(
 
             if (uiState.route != null && !uiState.isNavigating) {
                 Button(
-                    onClick = { viewModel.startNavigation() },
+                    onClick = { onStartNavigation(uiState.routeType) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Directions,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("开始导航")
+                }
+
+                Button(
+                    onClick = { onStartSimulation(uiState.routeType) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("模拟导航")
                 }
             }
 
