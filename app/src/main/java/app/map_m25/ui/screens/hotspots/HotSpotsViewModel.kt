@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import app.map_m25.domain.model.HotSpotLocation
 import app.map_m25.domain.model.LocationCategory
 import app.map_m25.domain.repository.LocationRepository
-import app.map_m25.domain.repository.SearchHistoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,8 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HotSpotsViewModel @Inject constructor(
-    private val locationRepository: LocationRepository,
-    private val searchHistoryRepository: SearchHistoryRepository
+    private val locationRepository: LocationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HotSpotsUiState())
@@ -39,7 +37,6 @@ class HotSpotsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             val favorites = locationRepository.getAllLocations().first()
-            val searchHistory = searchHistoryRepository.getAllHistory().first()
 
             val categoryCount = mutableMapOf<LocationCategory, Int>()
             val categoryLocations = mutableMapOf<LocationCategory, MutableList<HotSpotLocation>>()
@@ -57,25 +54,6 @@ class HotSpotsViewModel @Inject constructor(
                         latitude = location.latitude,
                         longitude = location.longitude,
                         address = location.address,
-                        visitCount = categoryCount[category] ?: 1,
-                        category = category
-                    )
-                )
-            }
-
-            searchHistory.take(20).forEach { history ->
-                val category = LocationCategory.OTHER
-                categoryCount[category] = (categoryCount[category] ?: 0) + 1
-                if (!categoryLocations.containsKey(category)) {
-                    categoryLocations[category] = mutableListOf()
-                }
-                categoryLocations[category]?.add(
-                    HotSpotLocation(
-                        id = history.id,
-                        name = history.name,
-                        latitude = history.latitude,
-                        longitude = history.longitude,
-                        address = history.address,
                         visitCount = categoryCount[category] ?: 1,
                         category = category
                     )

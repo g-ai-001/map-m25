@@ -1,5 +1,7 @@
 package app.map_m25.ui.screens.snapshot
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,10 +15,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.coilkt.coil3.compose.AsyncImage
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -105,19 +107,38 @@ private fun SnapshotCard(
     onDelete: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    val bitmap = try {
+        BitmapFactory.decodeFile(snapshot.filePath)?.asImageBitmap()
+    } catch (e: Exception) {
+        null
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column {
-            AsyncImage(
-                model = File(snapshot.filePath),
-                contentDescription = "地图快照",
+            bitmap?.let {
+                Image(
+                    bitmap = it,
+                    contentDescription = "地图快照",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } ?: Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
-                contentScale = ContentScale.Crop
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Image,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Column(
                 modifier = Modifier.padding(16.dp)
