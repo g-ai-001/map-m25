@@ -455,12 +455,12 @@ private fun ScaleBarOverlay(
     scale: Float,
     zoom: Float
 ) {
-    val metersPerPixel = 156543.33 * cos(39.9042 * Math.PI / 180) / (1 shl zoom.toInt())
+    val metersPerPixel = 156543.33 * cos(39.9042 * Math.PI / 180.0) / (1 shl zoom.toInt())
     val scaleBarWidth = 100.dp
     val realWidth = (scaleBarWidth.value * metersPerPixel / scale).toInt()
     val displayText = when {
         realWidth >= 1000 -> "${realWidth / 1000}公里"
-        realWidth >= 100 -> "${realWidth / 100}00米"
+        realWidth >= 100 -> "${realWidth / 100}百米"
         else -> "${realWidth}米"
     }
 

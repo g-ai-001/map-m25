@@ -106,7 +106,8 @@ class MapViewModel @Inject constructor(
         val lat2Rad = Math.toRadians(p2.latitude)
         val deltaLat = Math.toRadians(p2.latitude - p1.latitude)
         val deltaLng = Math.toRadians(p2.longitude - p1.longitude)
-        val a = kotlin.math.sin(deltaLat / 2).toFloat() * kotlin.math.sin(deltaLat / 2).toFloat() +
+        val sinDeltaLatHalf = kotlin.math.sin(deltaLat / 2).toFloat()
+        val a = sinDeltaLatHalf * sinDeltaLatHalf +
                 kotlin.math.cos(lat1Rad).toFloat() * kotlin.math.cos(lat2Rad).toFloat() *
                 kotlin.math.sin(deltaLng / 2).toFloat() * kotlin.math.sin(deltaLng / 2).toFloat()
         val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a.toDouble()).toFloat(), kotlin.math.sqrt((1 - a).toDouble()).toFloat())
