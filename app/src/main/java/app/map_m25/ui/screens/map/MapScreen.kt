@@ -36,7 +36,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThreeDRotation
+import androidx.compose.material.icons.filled.Transform
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -448,7 +448,7 @@ private fun TopBar(
             }
             IconButton(onClick = on3DToggle) {
                 Icon(
-                    imageVector = Icons.Default.ThreeDRotation,
+                    imageVector = Icons.Default.Transform,
                     contentDescription = "3D视图",
                     tint = if (is3DView) Color.Yellow else Color.White
                 )

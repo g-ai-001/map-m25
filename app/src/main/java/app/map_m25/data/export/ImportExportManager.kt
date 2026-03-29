@@ -189,8 +189,7 @@ object ImportExportManager {
             name = imported.name,
             latitude = imported.latitude,
             longitude = imported.longitude,
-            color = color,
-            description = imported.description
+            color = color
         )
     }
 
