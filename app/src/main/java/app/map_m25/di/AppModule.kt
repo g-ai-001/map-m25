@@ -4,15 +4,18 @@ import android.content.Context
 import androidx.room.Room
 import app.map_m25.data.local.MapDatabase
 import app.map_m25.data.local.dao.LocationDao
+import app.map_m25.data.local.dao.MarkerCategoryDao
 import app.map_m25.data.local.dao.MarkerDao
 import app.map_m25.data.local.dao.SearchHistoryDao
 import app.map_m25.data.local.dao.TrackDao
 import app.map_m25.data.local.datastore.SettingsDataStore
 import app.map_m25.data.repository.LocationRepositoryImpl
+import app.map_m25.data.repository.MarkerCategoryRepositoryImpl
 import app.map_m25.data.repository.MarkerRepositoryImpl
 import app.map_m25.data.repository.SearchHistoryRepositoryImpl
 import app.map_m25.data.repository.TrackRepositoryImpl
 import app.map_m25.domain.repository.LocationRepository
+import app.map_m25.domain.repository.MarkerCategoryRepository
 import app.map_m25.domain.repository.MarkerRepository
 import app.map_m25.domain.repository.SearchHistoryRepository
 import app.map_m25.domain.repository.TrackRepository
@@ -57,6 +60,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideMarkerCategoryDao(database: MapDatabase): MarkerCategoryDao {
+        return database.markerCategoryDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideTrackDao(database: MapDatabase): TrackDao {
         return database.trackDao()
     }
@@ -83,6 +92,12 @@ object AppModule {
     @Singleton
     fun provideMarkerRepository(markerDao: MarkerDao): MarkerRepository {
         return MarkerRepositoryImpl(markerDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMarkerCategoryRepository(markerCategoryDao: MarkerCategoryDao): MarkerCategoryRepository {
+        return MarkerCategoryRepositoryImpl(markerCategoryDao)
     }
 
     @Provides

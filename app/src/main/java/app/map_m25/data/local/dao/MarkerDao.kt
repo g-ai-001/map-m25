@@ -14,6 +14,9 @@ interface MarkerDao {
     @Query("SELECT * FROM markers ORDER BY createdAt DESC")
     fun getAllMarkers(): Flow<List<MarkerEntity>>
 
+    @Query("SELECT * FROM markers WHERE categoryId = :categoryId ORDER BY createdAt DESC")
+    fun getMarkersByCategory(categoryId: Long): Flow<List<MarkerEntity>>
+
     @Query("SELECT * FROM markers WHERE id = :id")
     suspend fun getMarkerById(id: Long): MarkerEntity?
 

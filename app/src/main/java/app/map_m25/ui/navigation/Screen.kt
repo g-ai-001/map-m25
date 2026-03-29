@@ -9,4 +9,8 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object Markers : Screen("markers")
     data object Tracks : Screen("tracks")
+    data object TrackStats : Screen("track_stats/{trackId}") {
+        fun createRoute(trackId: Long) = "track_stats/$trackId"
+    }
+    data object Export : Screen("export")
 }

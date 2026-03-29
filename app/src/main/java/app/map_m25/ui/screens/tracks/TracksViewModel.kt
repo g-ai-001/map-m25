@@ -21,6 +21,15 @@ data class TracksUiState(
     val currentLocation: TrackPoint? = null
 )
 
+data class TrackStatistics(
+    val totalDistance: Float = 0f,
+    val totalDuration: Long = 0L,
+    val avgSpeed: Float = 0f,
+    val maxSpeed: Float = 0f,
+    val elevationGain: Float = 0f,
+    val elevationLoss: Float = 0f
+)
+
 @HiltViewModel
 class TracksViewModel @Inject constructor(
     private val trackRepository: TrackRepository
@@ -28,6 +37,9 @@ class TracksViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TracksUiState())
     val uiState: StateFlow<TracksUiState> = _uiState.asStateFlow()
+
+    private val _statistics = MutableStateFlow(TrackStatistics())
+    val statistics: StateFlow<TrackStatistics> = _statistics.asStateFlow()
 
     init {
         loadTracks()
@@ -52,6 +64,7 @@ class TracksViewModel @Inject constructor(
                 isRecording = true,
                 currentTrack = Track(id = trackId, name = name)
             )
+            _statistics.value = TrackStatistics()
         }
     }
 
@@ -67,6 +80,7 @@ class TracksViewModel @Inject constructor(
             )
             trackRepository.addTrackPoint(currentTrack.id, point)
             val newPoints = _uiState.value.currentTrackPoints + point
+            updateStatistics(newPoints)
             _uiState.value = _uiState.value.copy(
                 currentTrackPoints = newPoints,
                 currentLocation = point
@@ -84,8 +98,42 @@ class TracksViewModel @Inject constructor(
                 currentTrack = null,
                 currentTrackPoints = emptyList()
             )
+            _statistics.value = TrackStatistics()
             loadTracks()
         }
+    }
+
+    fun loadTrackStatistics(trackId: Long) {
+        viewModelScope.launch {
+            val track = trackRepository.getTrackWithPoints(trackId)
+            track?.let {
+                _uiState.value = _uiState.value.copy(
+                    currentTrack = track,
+                    currentTrackPoints = track.points
+                )
+                updateStatistics(track.points)
+            }
+        }
+    }
+
+    private fun updateStatistics(points: List<TrackPoint>) {
+        if (points.size < 2) {
+            _statistics.value = TrackStatistics()
+            return
+        }
+        val totalDistance = calculateTotalDistance(points)
+        val duration = points.last().timestamp - points.first().timestamp
+        val avgSpeed = if (duration > 0) (totalDistance / (duration / 3600000f)) else 0f
+        val maxSpeed = calculateMaxSpeed(points)
+
+        _statistics.value = TrackStatistics(
+            totalDistance = totalDistance,
+            totalDuration = duration,
+            avgSpeed = avgSpeed,
+            maxSpeed = maxSpeed,
+            elevationGain = 0f,
+            elevationLoss = 0f
+        )
     }
 
     private fun calculateTotalDistance(points: List<TrackPoint>): Float {
@@ -95,6 +143,19 @@ class TracksViewModel @Inject constructor(
             total += calculateDistance(points[i], points[i + 1])
         }
         return total
+    }
+
+    private fun calculateMaxSpeed(points: List<TrackPoint>): Float {
+        var maxSpeed = 0f
+        for (i in 1 until points.size) {
+            val dist = calculateDistance(points[i - 1], points[i])
+            val time = (points[i].timestamp - points[i - 1].timestamp) / 3600000f
+            if (time > 0) {
+                val speed = dist / time
+                if (speed > maxSpeed) maxSpeed = speed
+            }
+        }
+        return maxSpeed
     }
 
     private fun calculateDistance(p1: TrackPoint, p2: TrackPoint): Float {
@@ -113,16 +174,6 @@ class TracksViewModel @Inject constructor(
     fun deleteTrack(trackId: Long) {
         viewModelScope.launch {
             trackRepository.deleteTrack(trackId)
-        }
-    }
-
-    fun loadTrackPoints(trackId: Long) {
-        viewModelScope.launch {
-            val track = trackRepository.getTrackWithPoints(trackId)
-            _uiState.value = _uiState.value.copy(
-                currentTrack = track,
-                currentTrackPoints = track?.points ?: emptyList()
-            )
         }
     }
 }

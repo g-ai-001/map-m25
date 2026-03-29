@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import app.map_m25.ui.screens.favorites.FavoritesScreen
 import app.map_m25.ui.screens.history.HistoryScreen
 import app.map_m25.ui.screens.map.MapScreen
@@ -12,6 +13,8 @@ import app.map_m25.ui.screens.markers.MarkersScreen
 import app.map_m25.ui.screens.route.RouteScreen
 import app.map_m25.ui.screens.search.SearchScreen
 import app.map_m25.ui.screens.settings.SettingsScreen
+import app.map_m25.ui.screens.export.ExportScreen
+import app.map_m25.ui.screens.tracks.TrackStatsScreen
 import app.map_m25.ui.screens.tracks.TracksScreen
 
 @Composable
@@ -56,7 +59,8 @@ fun MapNavHost(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToHistory = { navController.navigate(Screen.History.route) }
+                onNavigateToHistory = { navController.navigate(Screen.History.route) },
+                onNavigateToExport = { navController.navigate(Screen.Export.route) }
             )
         }
         composable(Screen.Markers.route) {
@@ -66,6 +70,24 @@ fun MapNavHost(
         }
         composable(Screen.Tracks.route) {
             TracksScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToStats = { trackId ->
+                    navController.navigate(Screen.TrackStats.createRoute(trackId))
+                }
+            )
+        }
+        composable(
+            route = Screen.TrackStats.route,
+            arguments = listOf(navArgument("trackId") { type = androidx.navigation.NavType.LongType })
+        ) { backStackEntry ->
+            val trackId = backStackEntry.arguments?.getLong("trackId") ?: 0L
+            TrackStatsScreen(
+                trackId = trackId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Export.route) {
+            ExportScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

@@ -1,5 +1,6 @@
 package app.map_m25.ui.screens.tracks
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,7 @@ import java.util.Locale
 @Composable
 fun TracksScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToStats: (Long) -> Unit = {},
     viewModel: TracksViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -168,7 +170,8 @@ fun TracksScreen(
                     items(uiState.tracks, key = { it.id }) { track ->
                         TrackItem(
                             track = track,
-                            onDelete = { viewModel.deleteTrack(track.id) }
+                            onDelete = { viewModel.deleteTrack(track.id) },
+                            onClick = { onNavigateToStats(track.id) }
                         )
                     }
                 }
@@ -214,13 +217,16 @@ fun TracksScreen(
 @Composable
 private fun TrackItem(
     track: Track,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onClick: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
     val dateStr = dateFormat.format(Date(track.createdAt))
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(

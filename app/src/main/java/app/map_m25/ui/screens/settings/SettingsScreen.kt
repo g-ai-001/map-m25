@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.ScreenLockPortrait
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.MyLocation
@@ -60,6 +61,7 @@ import app.map_m25.domain.model.MapLayer
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHistory: () -> Unit,
+    onNavigateToExport: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -210,6 +212,13 @@ fun SettingsScreen(
                     title = "搜索历史",
                     description = "查看和管理搜索记录",
                     onClick = onNavigateToHistory
+                )
+                HorizontalDivider()
+                ClickableSettingItem(
+                    icon = Icons.Default.Share,
+                    title = "数据导出",
+                    description = "导出标记和轨迹数据",
+                    onClick = onNavigateToExport
                 )
             }
 

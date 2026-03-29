@@ -20,6 +20,12 @@ class MarkerRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getMarkersByCategory(categoryId: Long): Flow<List<MapMarker>> {
+        return markerDao.getMarkersByCategory(categoryId).map { entities ->
+            entities.map { it.toMapMarker() }
+        }
+    }
+
     override suspend fun getMarkerById(id: Long): MapMarker? {
         return markerDao.getMarkerById(id)?.toMapMarker()
     }
@@ -42,6 +48,7 @@ class MarkerRepositoryImpl @Inject constructor(
         latitude = latitude,
         longitude = longitude,
         color = color,
+        categoryId = categoryId,
         createdAt = createdAt
     )
 
@@ -51,6 +58,7 @@ class MarkerRepositoryImpl @Inject constructor(
         latitude = latitude,
         longitude = longitude,
         color = color,
+        categoryId = categoryId,
         createdAt = createdAt
     )
 }
