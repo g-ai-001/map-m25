@@ -40,21 +40,20 @@
 
 ## 版本
 
-当前版本: 0.10.0
+当前版本: 0.10.1
+
+### 0.10.1 (2026-03-29)
+- 合并 SettingsViewModel 中重复的 combine 流程
+- 优化 MapScreen 背景颜色计算逻辑
+- 简化代码结构，减少重复代码
 
 ### 0.10.0 (2026-03-29)
 - 新增3D地图视角功能，支持倾斜手势和3D视图切换
 - 新增轨迹回放功能，支持播放控制（播放/暂停/停止/倍速）和进度显示
 - 新增标注导入功能，支持GPX/KML格式数据导入
 
-### 0.9.3 (2026-03-29)
-- 新增 DistanceUtils 工具类，统一距离计算逻辑
-- 新增 FormatUtils 工具类，统一格式化逻辑
-- 优化 MapViewModel.loadSettings() 使用嵌套 combine 合并多个 Flow
-- 优化 TrackStatsScreen 空安全检查，移除 double-bang 操作符
-- 移除未使用的导入
-
-### 0.9.0-0.9.2 (2026-03-29)
+### 0.9.0-0.9.3 (2026-03-29)
+- 0.9.3: 新增 DistanceUtils、FormatUtils 工具类，合并 MapViewModel loadSettings
 - 0.9.2: 修复 MapApplication 缺少 @HiltAndroidApp 注解导致的闪退问题
 - 0.9.1: 修复多处类型推断和导入错误
 - 0.9.0: 新增偏航提醒、模拟导航、导航面板优化
