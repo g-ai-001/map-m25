@@ -75,18 +75,25 @@ class MapViewModel @Inject constructor(
     private fun loadSettings() {
         viewModelScope.launch {
             combine(
-                settingsDataStore.mapStyle,
-                settingsDataStore.voiceEnabled,
-                settingsDataStore.showPoiLabels,
-                settingsDataStore.showRoadNames,
-                settingsDataStore.showTrafficSigns,
-                settingsDataStore.showBuildingLabels
-            ) { style, voice, poi, roads, traffic, buildings ->
-                SettingsData(style, voice, poi, roads, traffic, buildings)
+                combine(
+                    settingsDataStore.mapStyle,
+                    settingsDataStore.voiceEnabled,
+                    settingsDataStore.showPoiLabels
+                ) { style, voice, poi -> Triple(style, voice, poi) },
+                combine(
+                    settingsDataStore.showRoadNames,
+                    settingsDataStore.showTrafficSigns,
+                    settingsDataStore.showBuildingLabels
+                ) { roads, traffic, buildings -> Triple(roads, traffic, buildings) }
+            ) { first, second ->
+                SettingsData(
+                    first.first, first.second, first.third,
+                    second.first, second.second, second.third
+                )
             }.collect { settings ->
                 _uiState.value = _uiState.value.copy(
                     mapStyle = settings.style,
-                    voiceEnabled = settings.voiceEnabled,
+                    voiceEnabled = settings.voice,
                     displaySettings = MapDisplaySettings(
                         showPoiLabels = settings.showPoiLabels,
                         showRoadNames = settings.showRoadNames,

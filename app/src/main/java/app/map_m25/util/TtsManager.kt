@@ -100,7 +100,6 @@ class TtsManager @Inject constructor(
     }
 
     fun shutdown() {
-        utteranceListener?.let { textToSpeech?.removeUtteranceProgressListener(it) }
         textToSpeech?.stop()
         textToSpeech?.shutdown()
         textToSpeech = null
