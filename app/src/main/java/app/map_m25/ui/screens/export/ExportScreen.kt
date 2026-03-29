@@ -189,8 +189,10 @@ fun ExportScreen(
                 }
                 Button(
                     onClick = {
-                        viewModel.exportData()?.let { intent ->
-                            context.startActivity(Intent.createChooser(intent, "导出数据"))
+                        viewModel.exportData { intent ->
+                            intent?.let {
+                                context.startActivity(Intent.createChooser(it, "导出数据"))
+                            }
                         }
                     },
                     modifier = Modifier.weight(1f),

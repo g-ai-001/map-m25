@@ -108,45 +108,51 @@ class ExportViewModel @Inject constructor(
         )
     }
 
-    fun exportData(): Intent? {
-        _uiState.value = _uiState.value.copy(isExporting = true, exportSuccess = false, errorMessage = null)
+    fun exportData(onExportReady: (Intent?) -> Unit) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isExporting = true, exportSuccess = false, errorMessage = null)
 
-        val state = _uiState.value
-        if (state.selectedMarkerIds.isEmpty() && state.selectedTrackIds.isEmpty()) {
-            _uiState.value = state.copy(isExporting = false, errorMessage = "请选择要导出的数据")
-            return null
+            val state = _uiState.value
+            if (state.selectedMarkerIds.isEmpty() && state.selectedTrackIds.isEmpty()) {
+                _uiState.value = state.copy(isExporting = false, errorMessage = "请选择要导出的数据")
+                onExportReady(null)
+                return@launch
+            }
+
+            try {
+                val exportDir = File(context.getExternalFilesDir(null), "exports")
+                if (!exportDir.exists()) {
+                    exportDir.mkdirs()
+                }
+
+                val timestamp = System.currentTimeMillis()
+                val extension = if (state.exportFormat == ExportFormat.GPX) "gpx" else "kml"
+                val fileName = "map_export_$timestamp.$extension"
+                val exportFile = File(exportDir, fileName)
+
+                val content = buildExportContent()
+                exportFile.writeText(content)
+
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    exportFile
+                )
+
+                _uiState.value = state.copy(isExporting = false, exportSuccess = true)
+
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = if (state.exportFormat == ExportFormat.GPX) "application/gpx+xml" else "application/vnd.google-earth.kml+xml"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                onExportReady(intent)
+            } catch (e: Exception) {
+                _uiState.value = state.copy(isExporting = false, errorMessage = "导出失败: ${e.message}")
+                onExportReady(null)
+            }
         }
-
-        try {
-            val exportDir = File(context.getExternalFilesDir(null), "exports")
-            if (!exportDir.exists()) {
-                exportDir.mkdirs()
-            }
-
-            val timestamp = System.currentTimeMillis()
-            val extension = if (state.exportFormat == ExportFormat.GPX) "gpx" else "kml"
-            val fileName = "map_export_$timestamp.$extension"
-            val exportFile = File(exportDir, fileName)
-
-            val content = buildExportContent()
-            exportFile.writeText(content)
-
-            val uri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                exportFile
-            )
-
-            _uiState.value = state.copy(isExporting = false, exportSuccess = true)
-
-            return Intent(Intent.ACTION_SEND).apply {
-                type = if (state.exportFormat == ExportFormat.GPX) "application/gpx+xml" else "application/vnd.google-earth.kml+xml"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-        } catch (e: Exception) {
-            _uiState.value = state.copy(isExporting = false, errorMessage = "导出失败: ${e.message}")
-            return null
+    }
         }
     }
 
