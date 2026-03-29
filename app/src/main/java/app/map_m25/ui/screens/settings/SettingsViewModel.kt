@@ -39,61 +39,53 @@ class SettingsViewModel @Inject constructor(
 
     private fun loadSettings() {
         viewModelScope.launch {
+            settingsDataStore.darkMode.collect { darkMode ->
+                _uiState.value = _uiState.value.copy(darkMode = darkMode)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.mapZoom.collect { mapZoom ->
+                _uiState.value = _uiState.value.copy(mapZoom = mapZoom)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.keepScreenOn.collect { keepScreenOn ->
+                _uiState.value = _uiState.value.copy(keepScreenOn = keepScreenOn)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.highRefreshRate.collect { highRefreshRate ->
+                _uiState.value = _uiState.value.copy(highRefreshRate = highRefreshRate)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.mapLayer.collect { mapLayer ->
+                _uiState.value = _uiState.value.copy(mapLayer = mapLayer)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.mapStyle.collect { mapStyle ->
+                _uiState.value = _uiState.value.copy(mapStyle = mapStyle)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.voiceEnabled.collect { voiceEnabled ->
+                _uiState.value = _uiState.value.copy(voiceEnabled = voiceEnabled)
+            }
+        }
+        viewModelScope.launch {
             combine(
-                settingsDataStore.darkMode,
-                settingsDataStore.mapZoom,
-                settingsDataStore.keepScreenOn,
-                settingsDataStore.highRefreshRate,
-                settingsDataStore.mapLayer,
-                settingsDataStore.mapStyle
-            ) { darkMode, mapZoom, keepScreenOn, highRefreshRate, mapLayer, mapStyle ->
-                DarkModeData(darkMode, mapZoom, keepScreenOn, highRefreshRate, mapLayer, mapStyle)
-            }.collect { basic ->
-                combine(
-                    settingsDataStore.voiceEnabled,
-                    settingsDataStore.showPoiLabels,
-                    settingsDataStore.showRoadNames,
-                    settingsDataStore.showTrafficSigns,
-                    settingsDataStore.showBuildingLabels
-                ) { voiceEnabled, showPoi, showRoad, showTraffic, showBuilding ->
-                    DisplaySettingsData(voiceEnabled, showPoi, showRoad, showTraffic, showBuilding)
-                }.collect { display ->
-                    _uiState.value = SettingsUiState(
-                        darkMode = basic.darkMode,
-                        mapZoom = basic.mapZoom,
-                        keepScreenOn = basic.keepScreenOn,
-                        highRefreshRate = basic.highRefreshRate,
-                        mapLayer = basic.mapLayer,
-                        mapStyle = basic.mapStyle,
-                        voiceEnabled = display.voiceEnabled,
-                        displaySettings = MapDisplaySettings(
-                            showPoiLabels = display.showPoi,
-                            showRoadNames = display.showRoad,
-                            showTrafficSigns = display.showTraffic,
-                            showBuildingLabels = display.showBuilding
-                        )
-                    )
-                }
+                settingsDataStore.showPoiLabels,
+                settingsDataStore.showRoadNames,
+                settingsDataStore.showTrafficSigns,
+                settingsDataStore.showBuildingLabels
+            ) { showPoi, showRoad, showTraffic, showBuilding ->
+                MapDisplaySettings(showPoi, showRoad, showTraffic, showBuilding)
+            }.collect { displaySettings ->
+                _uiState.value = _uiState.value.copy(displaySettings = displaySettings)
             }
         }
     }
-
-    private data class DarkModeData(
-        val darkMode: Boolean,
-        val mapZoom: Float,
-        val keepScreenOn: Boolean,
-        val highRefreshRate: Boolean,
-        val mapLayer: MapLayer,
-        val mapStyle: MapStyle
-    )
-
-    private data class DisplaySettingsData(
-        val voiceEnabled: Boolean,
-        val showPoi: Boolean,
-        val showRoad: Boolean,
-        val showTraffic: Boolean,
-        val showBuilding: Boolean
-    )
 
     fun setDarkMode(enabled: Boolean) {
         viewModelScope.launch {
