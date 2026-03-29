@@ -27,6 +27,9 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Label
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.map_m25.BuildConfig
 import app.map_m25.domain.model.MapLayer
+import app.map_m25.domain.model.MapStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -282,6 +286,57 @@ fun SettingsScreen(
                     title = "地图图层",
                     currentLayer = uiState.mapLayer,
                     onLayerSelected = viewModel::setMapLayer
+                )
+                HorizontalDivider()
+                MapStyleSettingItem(
+                    icon = Icons.Default.Palette,
+                    title = "地图样式",
+                    currentStyle = uiState.mapStyle,
+                    onStyleSelected = viewModel::setMapStyle
+                )
+                HorizontalDivider()
+                SwitchSettingItem(
+                    icon = Icons.Default.VolumeUp,
+                    title = "语音播报",
+                    description = "启用导航语音播报",
+                    checked = uiState.voiceEnabled,
+                    onCheckedChange = viewModel::setVoiceEnabled
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SettingsSection(title = "地图注记显示") {
+                SwitchSettingItem(
+                    icon = Icons.Default.Label,
+                    title = "POI标签",
+                    description = "显示兴趣点标签",
+                    checked = uiState.displaySettings.showPoiLabels,
+                    onCheckedChange = viewModel::setShowPoiLabels
+                )
+                HorizontalDivider()
+                SwitchSettingItem(
+                    icon = Icons.Default.Label,
+                    title = "道路名称",
+                    description = "显示道路名称标注",
+                    checked = uiState.displaySettings.showRoadNames,
+                    onCheckedChange = viewModel::setShowRoadNames
+                )
+                HorizontalDivider()
+                SwitchSettingItem(
+                    icon = Icons.Default.Label,
+                    title = "交通标识",
+                    description = "显示交通标识",
+                    checked = uiState.displaySettings.showTrafficSigns,
+                    onCheckedChange = viewModel::setShowTrafficSigns
+                )
+                HorizontalDivider()
+                SwitchSettingItem(
+                    icon = Icons.Default.Label,
+                    title = "建筑物标注",
+                    description = "显示建筑物名称",
+                    checked = uiState.displaySettings.showBuildingLabels,
+                    onCheckedChange = viewModel::setShowBuildingLabels
                 )
             }
 
@@ -564,6 +619,64 @@ private fun MapLayerSettingItem(
                             MapLayer.SATELLITE -> "卫星地图"
                             MapLayer.TERRAIN -> "地形地图"
                         },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MapStyleSettingItem(
+    icon: ImageVector,
+    title: String,
+    currentStyle: MapStyle,
+    onStyleSelected: (MapStyle) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        Column(
+            modifier = Modifier
+                .padding(start = 40.dp, top = 8.dp)
+                .selectableGroup()
+        ) {
+            MapStyle.entries.forEach { style ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = currentStyle == style,
+                            onClick = { onStyleSelected(style) },
+                            role = Role.RadioButton
+                        )
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = currentStyle == style,
+                        onClick = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = style.displayName,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

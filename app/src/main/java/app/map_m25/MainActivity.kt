@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import app.map_m25.data.local.datastore.SettingsDataStore
 import app.map_m25.ui.navigation.MapNavHost
@@ -31,8 +33,11 @@ class MainActivity : ComponentActivity() {
         // Apply high refresh rate setting
         applyRefreshRateSettings()
 
+        val initialDarkMode = runBlocking { settingsDataStore.darkMode.first() }
+
         setContent {
-            MapAppTheme {
+            val darkMode by settingsDataStore.darkMode.collectAsState(initial = initialDarkMode)
+            MapAppTheme(darkTheme = darkMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

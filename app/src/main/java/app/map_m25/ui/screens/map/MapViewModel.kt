@@ -2,9 +2,12 @@ package app.map_m25.ui.screens.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.map_m25.data.local.datastore.SettingsDataStore
+import app.map_m25.domain.model.MapDisplaySettings
 import app.map_m25.domain.model.MapLayer
 import app.map_m25.domain.model.MapLocation
 import app.map_m25.domain.model.MapMarker
+import app.map_m25.domain.model.MapStyle
 import app.map_m25.domain.repository.LocationRepository
 import app.map_m25.domain.repository.MarkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,19 +30,23 @@ data class MapUiState(
     val selectedLocation: MapLocation? = null,
     val showLocationInfo: Boolean = false,
     val mapLayer: MapLayer = MapLayer.NORMAL,
+    val mapStyle: MapStyle = MapStyle.STANDARD,
+    val displaySettings: MapDisplaySettings = MapDisplaySettings(),
     val showCompass: Boolean = true,
     val showScaleBar: Boolean = true,
     val isMeasuring: Boolean = false,
     val measurePoints: List<MapLocation> = emptyList(),
     val totalDistance: Float = 0f,
     val markers: List<MapMarker> = emptyList(),
-    val isAddingMarker: Boolean = false
+    val isAddingMarker: Boolean = false,
+    val voiceEnabled: Boolean = true
 )
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
-    private val markerRepository: MarkerRepository
+    private val markerRepository: MarkerRepository,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -47,12 +54,54 @@ class MapViewModel @Inject constructor(
 
     init {
         loadMarkers()
+        loadSettings()
     }
 
     private fun loadMarkers() {
         viewModelScope.launch {
             markerRepository.getAllMarkers().collect { markers ->
                 _uiState.value = _uiState.value.copy(markers = markers)
+            }
+        }
+    }
+
+    private fun loadSettings() {
+        viewModelScope.launch {
+            settingsDataStore.mapStyle.collect { style ->
+                _uiState.value = _uiState.value.copy(mapStyle = style)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.voiceEnabled.collect { enabled ->
+                _uiState.value = _uiState.value.copy(voiceEnabled = enabled)
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.showPoiLabels.collect { show ->
+                _uiState.value = _uiState.value.copy(
+                    displaySettings = _uiState.value.displaySettings.copy(showPoiLabels = show)
+                )
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.showRoadNames.collect { show ->
+                _uiState.value = _uiState.value.copy(
+                    displaySettings = _uiState.value.displaySettings.copy(showRoadNames = show)
+                )
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.showTrafficSigns.collect { show ->
+                _uiState.value = _uiState.value.copy(
+                    displaySettings = _uiState.value.displaySettings.copy(showTrafficSigns = show)
+                )
+            }
+        }
+        viewModelScope.launch {
+            settingsDataStore.showBuildingLabels.collect { show ->
+                _uiState.value = _uiState.value.copy(
+                    displaySettings = _uiState.value.displaySettings.copy(showBuildingLabels = show)
+                )
             }
         }
     }

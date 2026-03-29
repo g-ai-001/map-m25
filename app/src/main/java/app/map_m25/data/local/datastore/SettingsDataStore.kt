@@ -23,6 +23,12 @@ class SettingsDataStore(
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val HIGH_REFRESH_RATE = booleanPreferencesKey("high_refresh_rate")
         val MAP_LAYER = stringPreferencesKey("map_layer")
+        val MAP_STYLE = stringPreferencesKey("map_style")
+        val VOICE_ENABLED = booleanPreferencesKey("voice_enabled")
+        val SHOW_POI_LABELS = booleanPreferencesKey("show_poi_labels")
+        val SHOW_ROAD_NAMES = booleanPreferencesKey("show_road_names")
+        val SHOW_TRAFFIC_SIGNS = booleanPreferencesKey("show_traffic_signs")
+        val SHOW_BUILDING_LABELS = booleanPreferencesKey("show_building_labels")
     }
 
     val darkMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -48,6 +54,35 @@ class SettingsDataStore(
         } catch (e: IllegalArgumentException) {
             MapLayer.NORMAL
         }
+    }
+
+    val mapStyle: Flow<MapStyle> = context.dataStore.data.map { prefs ->
+        val styleName = prefs[Keys.MAP_STYLE] ?: MapStyle.STANDARD.name
+        try {
+            MapStyle.valueOf(styleName)
+        } catch (e: IllegalArgumentException) {
+            MapStyle.STANDARD
+        }
+    }
+
+    val voiceEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.VOICE_ENABLED] ?: true
+    }
+
+    val showPoiLabels: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.SHOW_POI_LABELS] ?: true
+    }
+
+    val showRoadNames: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.SHOW_ROAD_NAMES] ?: true
+    }
+
+    val showTrafficSigns: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.SHOW_TRAFFIC_SIGNS] ?: true
+    }
+
+    val showBuildingLabels: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.SHOW_BUILDING_LABELS] ?: true
     }
 
     suspend fun setDarkMode(enabled: Boolean) {
@@ -77,6 +112,42 @@ class SettingsDataStore(
     suspend fun setMapLayer(layer: MapLayer) {
         context.dataStore.edit { prefs ->
             prefs[Keys.MAP_LAYER] = layer.name
+        }
+    }
+
+    suspend fun setMapStyle(style: MapStyle) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.MAP_STYLE] = style.name
+        }
+    }
+
+    suspend fun setVoiceEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.VOICE_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setShowPoiLabels(show: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.SHOW_POI_LABELS] = show
+        }
+    }
+
+    suspend fun setShowRoadNames(show: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.SHOW_ROAD_NAMES] = show
+        }
+    }
+
+    suspend fun setShowTrafficSigns(show: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.SHOW_TRAFFIC_SIGNS] = show
+        }
+    }
+
+    suspend fun setShowBuildingLabels(show: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.SHOW_BUILDING_LABELS] = show
         }
     }
 }

@@ -69,6 +69,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.map_m25.domain.model.MapLayer
 import app.map_m25.domain.model.MapLocation
 import app.map_m25.domain.model.MapMarker
+import app.map_m25.domain.model.MapStyle
 import app.map_m25.ui.theme.MapGreen
 import kotlin.math.cos
 import kotlin.math.sin
@@ -91,6 +92,34 @@ fun MapScreen(
     var scale by remember { mutableFloatStateOf(1f) }
     var rotation by remember { mutableFloatStateOf(0f) }
     var showLayerMenu by remember { mutableStateOf(false) }
+
+    val bgColor = when (uiState.mapStyle) {
+        MapStyle.STANDARD -> when (uiState.mapLayer) {
+            MapLayer.NORMAL -> Color(0xFFF5F5F5)
+            MapLayer.SATELLITE -> Color(0xFF2D4A2D)
+            MapLayer.TERRAIN -> Color(0xFFE8DCC8)
+        }
+        MapStyle.DARK -> when (uiState.mapLayer) {
+            MapLayer.NORMAL -> Color(0xFF1A1A2E)
+            MapLayer.SATELLITE -> Color(0xFF1A2D1A)
+            MapLayer.TERRAIN -> Color(0xFF2D2D1A)
+        }
+        MapStyle.LIGHT -> when (uiState.mapLayer) {
+            MapLayer.NORMAL -> Color(0xFFFFFFFF)
+            MapLayer.SATELLITE -> Color(0xFF3D5D3D)
+            MapLayer.TERRAIN -> Color(0xFFF5F0E8)
+        }
+        MapStyle.NAVY -> when (uiState.mapLayer) {
+            MapLayer.NORMAL -> Color(0xFF1A2D4D)
+            MapLayer.SATELLITE -> Color(0xFF1A3D2D)
+            MapLayer.TERRAIN -> Color(0xFF2D3D4D)
+        }
+        MapStyle.GREEN -> when (uiState.mapLayer) {
+            MapLayer.NORMAL -> Color(0xFFE8F5E9)
+            MapLayer.SATELLITE -> Color(0xFF2D4D2D)
+            MapLayer.TERRAIN -> Color(0xFFE8F0E0)
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(
@@ -132,11 +161,6 @@ fun MapScreen(
             val centerY = size.height / 2 + mapOffsetY
             val gridSize = 50f * scale
 
-            val bgColor = when (uiState.mapLayer) {
-                MapLayer.NORMAL -> Color(0xFFF5F5F5)
-                MapLayer.SATELLITE -> Color(0xFF2D4A2D)
-                MapLayer.TERRAIN -> Color(0xFFE8DCC8)
-            }
             drawRect(bgColor)
 
             for (x in 0..(size.width / gridSize).toInt() + 1) {
