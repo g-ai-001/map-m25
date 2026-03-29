@@ -51,6 +51,7 @@ import app.map_m25.domain.model.RouteType
 import app.map_m25.ui.theme.MapGreen
 import app.map_m25.ui.theme.RouteOrange
 import app.map_m25.ui.theme.WarningRed
+import app.map_m25.ui.theme.WarningRedDark
 
 @Composable
 fun NavigationPanel(
@@ -73,7 +74,7 @@ fun NavigationPanel(
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             colors = CardDefaults.cardColors(
                 containerColor = if (navigationState.isDeviated) {
-                    WarningRed.copy(alpha = 0.95f)
+                    WarningRedDark
                 } else {
                     MaterialTheme.colorScheme.surface
                 }

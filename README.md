@@ -38,9 +38,16 @@
 
 ## 版本
 
-当前版本: 0.9.0
+当前版本: 0.9.1
 
-### 0.9.0 (开发中)
+### 0.9.1 (2026-03-29)
+- 修复 MapNavHost.kt 中 RouteType 导入路径错误
+- 修复 MapNavHost.kt 中 @Composable 上下文问题
+- 修复 MapViewModel.kt 中 Triple 数据结构导致类型不匹配错误
+- 修复 NavigationPanel.kt 中 WarningRed 颜色定义问题
+- 修复 RouteScreen.kt 中 ButtonDefaults 缺失导入问题
+
+### 0.9.0 (2026-03-29)
 - 新增偏航提醒功能，偏离规划路线时自动提醒
 - 新增模拟导航功能，可模拟导航过程
 - 新增导航面板优化，显示剩余距离、时间、转向信息

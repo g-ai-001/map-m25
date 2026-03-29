@@ -320,13 +320,13 @@ class MapViewModel @Inject constructor(
             var remainingTime = 15
             val routeType = _uiState.value.navigationState.routeType
             val instructions = listOf(
-                "前方直行" to TurnDirection.STRAIGHT to "中关村大街",
-                "前方左转" to TurnDirection.LEFT to "科学院南路",
-                "前方右转" to TurnDirection.RIGHT to "知春路",
-                "前方直行" to TurnDirection.STRAIGHT to "知春路",
-                "前方靠左" to TurnDirection.SLIGHT_LEFT to "北四环西路",
-                "前方靠右" to TurnDirection.SLIGHT_RIGHT to "中关村一号",
-                "前方掉头" to TurnDirection.U_TURN to "中关村一号"
+                Triple("前方直行", TurnDirection.STRAIGHT, "中关村大街"),
+                Triple("前方左转", TurnDirection.LEFT, "科学院南路"),
+                Triple("前方右转", TurnDirection.RIGHT, "知春路"),
+                Triple("前方直行", TurnDirection.STRAIGHT, "知春路"),
+                Triple("前方靠左", TurnDirection.SLIGHT_LEFT, "北四环西路"),
+                Triple("前方靠右", TurnDirection.SLIGHT_RIGHT, "中关村一号"),
+                Triple("前方掉头", TurnDirection.U_TURN, "中关村一号")
             )
             var stepIndex = 0
 
@@ -336,13 +336,13 @@ class MapViewModel @Inject constructor(
                 remainingTime = (remainingTime - 1).coerceAtLeast(0)
 
                 if (stepIndex < instructions.size && remainingDist < 4.0f - stepIndex * 0.5f) {
-                    val (instruction, turn) = instructions[stepIndex]
+                    val (instruction, turn, roadName) = instructions[stepIndex]
                     stepIndex++
                     _uiState.value = _uiState.value.copy(
                         navigationState = _uiState.value.navigationState.copy(
                             currentInstruction = instruction,
                             nextTurnDirection = turn,
-                            nextRoadName = ""
+                            nextRoadName = roadName
                         )
                     )
                 }
