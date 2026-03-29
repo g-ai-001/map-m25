@@ -83,7 +83,7 @@ class TtsManager @Inject constructor(
         val speech = if (direction == "arrived") {
             "到达目的地"
         } else {
-            "$distanceText后，$directionText"
+            "${distanceText}后，$directionText"
         }
         speak(speech)
     }

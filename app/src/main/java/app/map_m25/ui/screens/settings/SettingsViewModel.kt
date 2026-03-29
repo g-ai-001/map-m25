@@ -44,32 +44,36 @@ class SettingsViewModel @Inject constructor(
                 settingsDataStore.mapZoom,
                 settingsDataStore.keepScreenOn,
                 settingsDataStore.highRefreshRate,
-                settingsDataStore.mapLayer,
-                settingsDataStore.mapStyle,
-                settingsDataStore.voiceEnabled,
-                settingsDataStore.showPoiLabels,
-                settingsDataStore.showRoadNames,
-                settingsDataStore.showTrafficSigns,
-                settingsDataStore.showBuildingLabels
-            ) { values ->
-                @Suppress("UNCHECKED_CAST")
-                SettingsUiState(
-                    darkMode = values[0] as Boolean,
-                    mapZoom = values[1] as Float,
-                    keepScreenOn = values[2] as Boolean,
-                    highRefreshRate = values[3] as Boolean,
-                    mapLayer = values[4] as MapLayer,
-                    mapStyle = values[5] as MapStyle,
-                    voiceEnabled = values[6] as Boolean,
-                    displaySettings = MapDisplaySettings(
-                        showPoiLabels = values[7] as Boolean,
-                        showRoadNames = values[8] as Boolean,
-                        showTrafficSigns = values[9] as Boolean,
-                        showBuildingLabels = values[10] as Boolean
+                settingsDataStore.mapLayer
+            ) { darkMode, mapZoom, keepScreenOn, highRefreshRate, mapLayer ->
+                listOf(darkMode, mapZoom, keepScreenOn, highRefreshRate, mapLayer)
+            }.collect { basicSettings ->
+                combine(
+                    settingsDataStore.mapStyle,
+                    settingsDataStore.voiceEnabled,
+                    settingsDataStore.showPoiLabels,
+                    settingsDataStore.showRoadNames,
+                    settingsDataStore.showTrafficSigns,
+                    settingsDataStore.showBuildingLabels
+                ) { mapStyle, voiceEnabled, showPoi, showRoad, showTraffic, showBuilding ->
+                    SettingsUiState(
+                        darkMode = basicSettings[0] as Boolean,
+                        mapZoom = basicSettings[1] as Float,
+                        keepScreenOn = basicSettings[2] as Boolean,
+                        highRefreshRate = basicSettings[3] as Boolean,
+                        mapLayer = basicSettings[4] as MapLayer,
+                        mapStyle = mapStyle,
+                        voiceEnabled = voiceEnabled,
+                        displaySettings = MapDisplaySettings(
+                            showPoiLabels = showPoi,
+                            showRoadNames = showRoad,
+                            showTrafficSigns = showTraffic,
+                            showBuildingLabels = showBuilding
+                        )
                     )
-                )
-            }.collect { state ->
-                _uiState.value = state
+                }.collect { state ->
+                    _uiState.value = state
+                }
             }
         }
     }
