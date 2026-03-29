@@ -2,11 +2,13 @@ package app.map_m25
 
 import android.app.Application
 import android.util.Log
+import dagger.hilt.android.HiltAndroidApp
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@HiltAndroidApp
 class MapApplication : Application() {
 
     override fun onCreate() {
