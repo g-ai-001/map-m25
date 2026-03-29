@@ -153,8 +153,6 @@ class ExportViewModel @Inject constructor(
             }
         }
     }
-        }
-    }
 
     private suspend fun buildExportContent(): String {
         val state = _uiState.value
