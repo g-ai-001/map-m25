@@ -2,11 +2,9 @@
 - 必须按照prompt.md文件中的开发流程完成新版本的开发
 
 
-
-
 # 注意事项
 - prompt.md文件用于下达指令给Claude Code, 禁止AI修改prompt.md文件
-- .github/workflows/build.yml文件用于GitHub Actions构建, 除了0.1.0版本从脚手架代码复制例外, 禁止AI修改.github/workflows/build.yml文件
+- .github/workflows/build.yml文件用于GitHub Actions构建, 必须与此文件完全相同 http://192.168.31.120:3020/github/kotlin-android-app-example/raw/branch/main/.github/workflows/build.yml
 - 隐私秘钥等文件禁止上传到GitHub仓库
 - 授权Claude Code自动执行命令和计划, 无需批准确认
 - 必须使用main分支开发新版本
