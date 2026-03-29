@@ -95,9 +95,16 @@
 - [ ] 语音播报功能（导航播报、位置提醒）
 - [ ] 地图注记显示控制（POI、道路名称、交通标识）
 
+### 0.8.1 (修复版本)
+- [x] 修复 SettingsViewModel 中 combine 函数类型推断问题
+- [x] 优化 loadSettings 函数，使用 combine 合并多个 Flow 减少重复代码
+
 ## 已完成版本
 
-### 0.7.1 (2026-03-29)
+### 0.8.1 (2026-03-29)
+修复版本，包含以下修复：
+- 修复 SettingsViewModel 中 combine 函数类型推断导致的编译错误
+- 重构 loadSettings 函数，使用 combine 合并多个设置 Flow，减少代码重复
 重构优化版本，包含以下改进：
 - 修复ScaleBarOverlay中cos函数参数类型问题
 - 修正距离显示逻辑（百米显示）

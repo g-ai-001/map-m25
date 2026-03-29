@@ -39,38 +39,34 @@ class SettingsViewModel @Inject constructor(
 
     private fun loadSettings() {
         viewModelScope.launch {
-            settingsDataStore.darkMode.collect { darkMode ->
-                _uiState.value = _uiState.value.copy(darkMode = darkMode)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.mapZoom.collect { mapZoom ->
-                _uiState.value = _uiState.value.copy(mapZoom = mapZoom)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.keepScreenOn.collect { keepScreenOn ->
-                _uiState.value = _uiState.value.copy(keepScreenOn = keepScreenOn)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.highRefreshRate.collect { highRefreshRate ->
-                _uiState.value = _uiState.value.copy(highRefreshRate = highRefreshRate)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.mapLayer.collect { mapLayer ->
-                _uiState.value = _uiState.value.copy(mapLayer = mapLayer)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.mapStyle.collect { mapStyle ->
-                _uiState.value = _uiState.value.copy(mapStyle = mapStyle)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.voiceEnabled.collect { voiceEnabled ->
-                _uiState.value = _uiState.value.copy(voiceEnabled = voiceEnabled)
+            combine(
+                settingsDataStore.darkMode,
+                settingsDataStore.mapZoom,
+                settingsDataStore.keepScreenOn,
+                settingsDataStore.highRefreshRate,
+                settingsDataStore.mapLayer,
+                settingsDataStore.mapStyle,
+                settingsDataStore.voiceEnabled
+            ) { darkMode, mapZoom, keepScreenOn, highRefreshRate, mapLayer, mapStyle, voiceEnabled ->
+                SettingsUiState(
+                    darkMode = darkMode,
+                    mapZoom = mapZoom,
+                    keepScreenOn = keepScreenOn,
+                    highRefreshRate = highRefreshRate,
+                    mapLayer = mapLayer,
+                    mapStyle = mapStyle,
+                    voiceEnabled = voiceEnabled
+                )
+            }.collect { newState ->
+                _uiState.value = _uiState.value.copy(
+                    darkMode = newState.darkMode,
+                    mapZoom = newState.mapZoom,
+                    keepScreenOn = newState.keepScreenOn,
+                    highRefreshRate = newState.highRefreshRate,
+                    mapLayer = newState.mapLayer,
+                    mapStyle = newState.mapStyle,
+                    voiceEnabled = newState.voiceEnabled
+                )
             }
         }
         viewModelScope.launch {
@@ -79,7 +75,7 @@ class SettingsViewModel @Inject constructor(
                 settingsDataStore.showRoadNames,
                 settingsDataStore.showTrafficSigns,
                 settingsDataStore.showBuildingLabels
-            ) { showPoi, showRoad, showTraffic, showBuilding ->
+            ) { showPoi: Boolean, showRoad: Boolean, showTraffic: Boolean, showBuilding: Boolean ->
                 MapDisplaySettings(showPoi, showRoad, showTraffic, showBuilding)
             }.collect { displaySettings ->
                 _uiState.value = _uiState.value.copy(displaySettings = displaySettings)
