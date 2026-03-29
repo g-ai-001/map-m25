@@ -21,9 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.TurnLeft
-import androidx.compose.material.icons.automirrored.filled.TurnRight
-import androidx.compose.material.icons.filled.Alert
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.PlayArrow
@@ -230,7 +229,7 @@ fun NavigationPanel(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Alert,
+                            imageVector = Icons.Default.Warning,
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
@@ -255,10 +254,10 @@ private fun TurnDirectionIcon(
 ) {
     val icon = when (turnDirection) {
         TurnDirection.STRAIGHT -> Icons.Default.Straight
-        TurnDirection.LEFT -> Icons.AutoMirrored.Filled.TurnLeft
-        TurnDirection.RIGHT -> Icons.AutoMirrored.Filled.TurnRight
-        TurnDirection.SLIGHT_LEFT -> Icons.AutoMirrored.Filled.TurnLeft
-        TurnDirection.SLIGHT_RIGHT -> Icons.AutoMirrored.Filled.TurnRight
+        TurnDirection.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
+        TurnDirection.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
+        TurnDirection.SLIGHT_LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
+        TurnDirection.SLIGHT_RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
         TurnDirection.U_TURN -> Icons.AutoMirrored.Filled.ArrowBack
     }
 
