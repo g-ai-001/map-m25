@@ -25,6 +25,19 @@ data class SettingsUiState(
     val displaySettings: MapDisplaySettings = MapDisplaySettings()
 )
 
+private data class DarkModeData(
+    val darkMode: Boolean,
+    val mapZoom: Float,
+    val keepScreenOn: Boolean,
+    val highRefreshRate: Boolean
+)
+
+private data class MapDisplayData(
+    val mapLayer: MapLayer,
+    val mapStyle: MapStyle,
+    val voiceEnabled: Boolean
+)
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore
@@ -40,33 +53,33 @@ class SettingsViewModel @Inject constructor(
     private fun loadSettings() {
         viewModelScope.launch {
             combine(
-                settingsDataStore.darkMode,
-                settingsDataStore.mapZoom,
-                settingsDataStore.keepScreenOn,
-                settingsDataStore.highRefreshRate,
-                settingsDataStore.mapLayer,
-                settingsDataStore.mapStyle,
-                settingsDataStore.voiceEnabled
-            ) { darkMode, mapZoom, keepScreenOn, highRefreshRate, mapLayer, mapStyle, voiceEnabled ->
+                combine(
+                    settingsDataStore.darkMode,
+                    settingsDataStore.mapZoom,
+                    settingsDataStore.keepScreenOn,
+                    settingsDataStore.highRefreshRate
+                ) { darkMode, mapZoom, keepScreenOn, highRefreshRate ->
+                    DarkModeData(darkMode, mapZoom, keepScreenOn, highRefreshRate)
+                },
+                combine(
+                    settingsDataStore.mapLayer,
+                    settingsDataStore.mapStyle,
+                    settingsDataStore.voiceEnabled
+                ) { mapLayer, mapStyle, voiceEnabled ->
+                    MapDisplayData(mapLayer, mapStyle, voiceEnabled)
+                }
+            ) { darkData, displayData ->
                 SettingsUiState(
-                    darkMode = darkMode,
-                    mapZoom = mapZoom,
-                    keepScreenOn = keepScreenOn,
-                    highRefreshRate = highRefreshRate,
-                    mapLayer = mapLayer,
-                    mapStyle = mapStyle,
-                    voiceEnabled = voiceEnabled
+                    darkMode = darkData.darkMode,
+                    mapZoom = darkData.mapZoom,
+                    keepScreenOn = darkData.keepScreenOn,
+                    highRefreshRate = darkData.highRefreshRate,
+                    mapLayer = displayData.mapLayer,
+                    mapStyle = displayData.mapStyle,
+                    voiceEnabled = displayData.voiceEnabled
                 )
             }.collect { newState ->
-                _uiState.value = _uiState.value.copy(
-                    darkMode = newState.darkMode,
-                    mapZoom = newState.mapZoom,
-                    keepScreenOn = newState.keepScreenOn,
-                    highRefreshRate = newState.highRefreshRate,
-                    mapLayer = newState.mapLayer,
-                    mapStyle = newState.mapStyle,
-                    voiceEnabled = newState.voiceEnabled
-                )
+                _uiState.value = newState
             }
         }
         viewModelScope.launch {
@@ -75,7 +88,7 @@ class SettingsViewModel @Inject constructor(
                 settingsDataStore.showRoadNames,
                 settingsDataStore.showTrafficSigns,
                 settingsDataStore.showBuildingLabels
-            ) { showPoi: Boolean, showRoad: Boolean, showTraffic: Boolean, showBuilding: Boolean ->
+            ) { showPoi, showRoad, showTraffic, showBuilding ->
                 MapDisplaySettings(showPoi, showRoad, showTraffic, showBuilding)
             }.collect { displaySettings ->
                 _uiState.value = _uiState.value.copy(displaySettings = displaySettings)
