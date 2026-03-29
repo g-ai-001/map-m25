@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThreeDRotation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -92,6 +93,7 @@ fun MapScreen(
     var mapOffsetY by remember { mutableFloatStateOf(0f) }
     var scale by remember { mutableFloatStateOf(1f) }
     var rotation by remember { mutableFloatStateOf(0f) }
+    var tilt by remember { mutableFloatStateOf(0f) }
     var showLayerMenu by remember { mutableStateOf(false) }
 
     val bgColor = when (uiState.mapStyle) {
@@ -128,6 +130,12 @@ fun MapScreen(
                 .fillMaxSize()
                 .graphicsLayer {
                     rotationZ = rotation
+                    scaleX = if (uiState.is3DView || tilt > 0f) {
+                        1f + (tilt / 100f) * 0.1f
+                    } else 1f
+                    scaleY = if (uiState.is3DView || tilt > 0f) {
+                        1f - (tilt / 100f) * 0.05f
+                    } else 1f
                     compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
                 }
                 .pointerInput(Unit) {
@@ -137,6 +145,14 @@ fun MapScreen(
                         mapOffsetY += pan.y
                         rotation += rotationChange
                         viewModel.onRotationChange(rotation)
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, _, _, verticalZoom ->
+                        if (uiState.is3DView || verticalZoom != 0f) {
+                            tilt = (tilt + verticalZoom * 10).coerceIn(0f, 60f)
+                            viewModel.onTiltChange(tilt)
+                        }
                     }
                 }
                 .pointerInput(Unit) {
@@ -297,15 +313,19 @@ fun MapScreen(
                 onLayerSelected = {
                     viewModel.setMapLayer(it)
                     showLayerMenu = false
-                }
+                },
+                is3DView = uiState.is3DView,
+                on3DToggle = { viewModel.toggle3DView() }
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
-            if (uiState.showCompass && rotation != 0f) {
+            if (uiState.showCompass && (rotation != 0f || uiState.is3DView || tilt > 0f)) {
                 CompassOverlay(
                     rotation = rotation,
-                    onClick = { viewModel.resetRotation() }
+                    tilt = tilt,
+                    onClick = { viewModel.resetRotation() },
+                    onTiltReset = { viewModel.resetTilt() }
                 )
             }
 
@@ -392,7 +412,9 @@ private fun TopBar(
     layerMenuExpanded: Boolean,
     onLayerMenuDismiss: () -> Unit,
     currentLayer: MapLayer,
-    onLayerSelected: (MapLayer) -> Unit
+    onLayerSelected: (MapLayer) -> Unit,
+    is3DView: Boolean,
+    on3DToggle: () -> Unit
 ) {
     Box {
         Row(
@@ -422,6 +444,13 @@ private fun TopBar(
                     imageVector = Icons.Default.Layers,
                     contentDescription = "图层",
                     tint = Color.White
+                )
+            }
+            IconButton(onClick = on3DToggle) {
+                Icon(
+                    imageVector = Icons.Default.ThreeDRotation,
+                    contentDescription = "3D视图",
+                    tint = if (is3DView) Color.Yellow else Color.White
                 )
             }
             IconButton(onClick = onSettingsClick) {
@@ -461,7 +490,9 @@ private fun TopBar(
 @Composable
 private fun CompassOverlay(
     rotation: Float,
-    onClick: () -> Unit
+    tilt: Float = 0f,
+    onClick: () -> Unit,
+    onTiltReset: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -469,15 +500,25 @@ private fun CompassOverlay(
             .size(48.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
-            .clickable(onClick = onClick),
+            .clickable {
+                if (tilt > 0f) onTiltReset() else onClick()
+            },
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Default.Navigation,
             contentDescription = "指南针",
-            tint = Color.Red,
+            tint = if (tilt > 0f) Color.Blue else Color.Red,
             modifier = Modifier.graphicsLayer { rotationZ = -rotation }
         )
+        if (tilt > 0f) {
+            Text(
+                text = "${tilt.toInt()}°",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Blue,
+                modifier = Modifier.padding(top = 40.dp)
+            )
+        }
     }
 }
 

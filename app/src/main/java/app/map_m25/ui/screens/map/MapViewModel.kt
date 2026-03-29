@@ -32,6 +32,8 @@ data class MapUiState(
     ),
     val zoom: Float = 15f,
     val rotation: Float = 0f,
+    val tilt: Float = 0f,
+    val is3DView: Boolean = false,
     val isLocating: Boolean = false,
     val selectedLocation: MapLocation? = null,
     val showLocationInfo: Boolean = false,
@@ -170,6 +172,22 @@ class MapViewModel @Inject constructor(
 
     fun resetRotation() {
         _uiState.value = _uiState.value.copy(rotation = 0f)
+    }
+
+    fun onTiltChange(tilt: Float) {
+        _uiState.value = _uiState.value.copy(tilt = tilt.coerceIn(0f, 60f))
+    }
+
+    fun toggle3DView() {
+        val newIs3D = !_uiState.value.is3DView
+        _uiState.value = _uiState.value.copy(
+            is3DView = newIs3D,
+            tilt = if (newIs3D) 45f else 0f
+        )
+    }
+
+    fun resetTilt() {
+        _uiState.value = _uiState.value.copy(tilt = 0f, is3DView = false)
     }
 
     fun startLocation() {

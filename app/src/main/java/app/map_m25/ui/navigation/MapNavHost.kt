@@ -20,6 +20,7 @@ import app.map_m25.ui.screens.search.SearchScreen
 import app.map_m25.ui.screens.settings.SettingsScreen
 import app.map_m25.ui.screens.snapshot.MapSnapshotsScreen
 import app.map_m25.ui.screens.export.ExportScreen
+import app.map_m25.ui.screens.tracks.TrackPlaybackScreen
 import app.map_m25.ui.screens.tracks.TrackStatsScreen
 import app.map_m25.ui.screens.tracks.TracksScreen
 
@@ -106,6 +107,19 @@ fun MapNavHost(
         ) { backStackEntry ->
             val trackId = backStackEntry.arguments?.getLong("trackId") ?: 0L
             TrackStatsScreen(
+                trackId = trackId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToPlayback = { id ->
+                    navController.navigate(Screen.TrackPlayback.createRoute(id))
+                }
+            )
+        }
+        composable(
+            route = Screen.TrackPlayback.route,
+            arguments = listOf(navArgument("trackId") { type = androidx.navigation.NavType.LongType })
+        ) { backStackEntry ->
+            val trackId = backStackEntry.arguments?.getLong("trackId") ?: 0L
+            TrackPlaybackScreen(
                 trackId = trackId,
                 onNavigateBack = { navController.popBackStack() }
             )

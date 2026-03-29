@@ -15,9 +15,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +44,7 @@ import app.map_m25.util.FormatUtils
 fun TrackStatsScreen(
     trackId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToPlayback: (Long) -> Unit = {},
     viewModel: TracksViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -143,6 +146,18 @@ fun TrackStatsScreen(
                             uiState.currentTrackPoints.lastOrNull()?.longitude ?: 0.0
                         ))
                     }
+                }
+
+                Button(
+                    onClick = { onNavigateToPlayback(trackId) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text("回放轨迹")
                 }
             } else {
                 Column(

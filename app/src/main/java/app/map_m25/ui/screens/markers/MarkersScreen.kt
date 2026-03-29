@@ -20,12 +20,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -39,11 +44,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.map_m25.domain.model.MapMarker
 import app.map_m25.domain.model.MarkerCategory
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -71,8 +79,20 @@ fun MarkersScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showCategoryDialog by remember { mutableStateOf(false) }
+    var showImportDialog by remember { mutableStateOf(false) }
+    var importContent by remember { mutableStateOf("") }
     var newCategoryName by remember { mutableStateOf("") }
     var selectedColor by remember { mutableIntStateOf(categoryColors[0]) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.importMessage) {
+        uiState.importMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearImportMessage()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -85,9 +105,18 @@ fun MarkersScreen(
                             contentDescription = "返回"
                         )
                     }
+                },
+                actions = {
+                    IconButton(onClick = { showImportDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.FileOpen,
+                            contentDescription = "导入标记"
+                        )
+                    }
                 }
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCategoryDialog = true }
@@ -236,6 +265,57 @@ fun MarkersScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showCategoryDialog = false }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+
+    if (showImportDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showImportDialog = false
+                importContent = ""
+            },
+            title = { Text("导入标记") },
+            text = {
+                Column {
+                    Text(
+                        text = "粘贴GPX或KML格式的标记数据：",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = importContent,
+                        onValueChange = { importContent = it },
+                        label = { Text("GPX/KML内容") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        maxLines = 10
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (importContent.isNotBlank()) {
+                            viewModel.importMarkers(importContent, "import.gpx")
+                            showImportDialog = false
+                            importContent = ""
+                        }
+                    }
+                ) {
+                    Text("导入")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showImportDialog = false
+                        importContent = ""
+                    }
+                ) {
                     Text("取消")
                 }
             }

@@ -2,6 +2,8 @@ package app.map_m25.ui.screens.markers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.map_m25.data.export.ImportExportManager
+import app.map_m25.data.export.ImportResult
 import app.map_m25.domain.model.MapMarker
 import app.map_m25.domain.model.MarkerCategory
 import app.map_m25.domain.repository.MarkerCategoryRepository
@@ -18,7 +20,8 @@ data class MarkersUiState(
     val markers: List<MapMarker> = emptyList(),
     val categories: List<MarkerCategory> = emptyList(),
     val selectedCategoryId: Long? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val importMessage: String? = null
 )
 
 @HiltViewModel
@@ -95,5 +98,33 @@ class MarkersViewModel @Inject constructor(
         viewModelScope.launch {
             markerRepository.deleteMarker(markerId)
         }
+    }
+
+    fun importMarkers(content: String, fileName: String) {
+        viewModelScope.launch {
+            val result = ImportExportManager.importFromContent(content, fileName)
+            when (result) {
+                is ImportResult.Success -> {
+                    var importedCount = 0
+                    result.markers.forEach { imported ->
+                        val marker = ImportExportManager.convertToMarkers(imported)
+                        markerRepository.saveMarker(marker)
+                        importedCount++
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        importMessage = "成功导入 $importedCount 个标记"
+                    )
+                }
+                is ImportResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        importMessage = result.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun clearImportMessage() {
+        _uiState.value = _uiState.value.copy(importMessage = null)
     }
 }
