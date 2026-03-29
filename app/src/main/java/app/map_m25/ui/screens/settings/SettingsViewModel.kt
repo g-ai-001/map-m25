@@ -67,8 +67,16 @@ class SettingsViewModel @Inject constructor(
                     settingsDataStore.voiceEnabled
                 ) { mapLayer, mapStyle, voiceEnabled ->
                     MapDisplayData(mapLayer, mapStyle, voiceEnabled)
+                },
+                combine(
+                    settingsDataStore.showPoiLabels,
+                    settingsDataStore.showRoadNames,
+                    settingsDataStore.showTrafficSigns,
+                    settingsDataStore.showBuildingLabels
+                ) { showPoi, showRoad, showTraffic, showBuilding ->
+                    MapDisplaySettings(showPoi, showRoad, showTraffic, showBuilding)
                 }
-            ) { darkData, displayData ->
+            ) { darkData, displayData, displaySettings ->
                 SettingsUiState(
                     darkMode = darkData.darkMode,
                     mapZoom = darkData.mapZoom,
@@ -76,22 +84,11 @@ class SettingsViewModel @Inject constructor(
                     highRefreshRate = darkData.highRefreshRate,
                     mapLayer = displayData.mapLayer,
                     mapStyle = displayData.mapStyle,
-                    voiceEnabled = displayData.voiceEnabled
+                    voiceEnabled = displayData.voiceEnabled,
+                    displaySettings = displaySettings
                 )
             }.collect { newState ->
                 _uiState.value = newState
-            }
-        }
-        viewModelScope.launch {
-            combine(
-                settingsDataStore.showPoiLabels,
-                settingsDataStore.showRoadNames,
-                settingsDataStore.showTrafficSigns,
-                settingsDataStore.showBuildingLabels
-            ) { showPoi, showRoad, showTraffic, showBuilding ->
-                MapDisplaySettings(showPoi, showRoad, showTraffic, showBuilding)
-            }.collect { displaySettings ->
-                _uiState.value = _uiState.value.copy(displaySettings = displaySettings)
             }
         }
     }
