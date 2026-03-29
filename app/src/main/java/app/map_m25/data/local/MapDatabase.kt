@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import app.map_m25.data.local.dao.LocationDao
 import app.map_m25.data.local.dao.MarkerCategoryDao
 import app.map_m25.data.local.dao.MarkerDao
+import app.map_m25.data.local.dao.OfflineRegionDao
 import app.map_m25.data.local.dao.SearchHistoryDao
 import app.map_m25.data.local.dao.TrackDao
 import app.map_m25.data.local.entity.LocationEntity
