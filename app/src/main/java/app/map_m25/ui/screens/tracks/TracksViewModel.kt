@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.map_m25.domain.model.Track
 import app.map_m25.domain.model.TrackPoint
 import app.map_m25.domain.repository.TrackRepository
+import app.map_m25.util.DistanceUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -140,7 +141,10 @@ class TracksViewModel @Inject constructor(
         if (points.size < 2) return 0f
         var total = 0f
         for (i in 0 until points.size - 1) {
-            total += calculateDistance(points[i], points[i + 1])
+            total += DistanceUtils.calculateDistance(
+                points[i].latitude, points[i].longitude,
+                points[i + 1].latitude, points[i + 1].longitude
+            )
         }
         return total
     }
@@ -148,7 +152,10 @@ class TracksViewModel @Inject constructor(
     private fun calculateMaxSpeed(points: List<TrackPoint>): Float {
         var maxSpeed = 0f
         for (i in 1 until points.size) {
-            val dist = calculateDistance(points[i - 1], points[i])
+            val dist = DistanceUtils.calculateDistance(
+                points[i - 1].latitude, points[i - 1].longitude,
+                points[i].latitude, points[i].longitude
+            )
             val time = (points[i].timestamp - points[i - 1].timestamp) / 3600000f
             if (time > 0) {
                 val speed = dist / time
@@ -156,19 +163,6 @@ class TracksViewModel @Inject constructor(
             }
         }
         return maxSpeed
-    }
-
-    private fun calculateDistance(p1: TrackPoint, p2: TrackPoint): Float {
-        val r = 6371f
-        val lat1Rad = Math.toRadians(p1.latitude)
-        val lat2Rad = Math.toRadians(p2.latitude)
-        val deltaLat = Math.toRadians(p2.latitude - p1.latitude)
-        val deltaLng = Math.toRadians(p2.longitude - p1.longitude)
-        val a = kotlin.math.sin(deltaLat / 2).toFloat() * kotlin.math.sin(deltaLat / 2).toFloat() +
-                kotlin.math.cos(lat1Rad).toFloat() * kotlin.math.cos(lat2Rad).toFloat() *
-                kotlin.math.sin(deltaLng / 2).toFloat() * kotlin.math.sin(deltaLng / 2).toFloat()
-        val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a.toDouble()).toFloat(), kotlin.math.sqrt((1 - a).toDouble()).toFloat())
-        return r * c
     }
 
     fun deleteTrack(trackId: Long) {

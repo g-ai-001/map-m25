@@ -16,6 +16,7 @@ class TtsManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private var textToSpeech: TextToSpeech? = null
+    private var utteranceListener: UtteranceProgressListener? = null
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
@@ -39,7 +40,7 @@ class TtsManager @Inject constructor(
     }
 
     private fun setupUtteranceListener() {
-        textToSpeech?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+        utteranceListener = object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
                 _isSpeaking.value = true
             }
@@ -56,7 +57,8 @@ class TtsManager @Inject constructor(
             override fun onError(utteranceId: String?, errorCode: Int) {
                 _isSpeaking.value = false
             }
-        })
+        }
+        textToSpeech?.setOnUtteranceProgressListener(utteranceListener)
     }
 
     fun speak(text: String) {
@@ -98,9 +100,11 @@ class TtsManager @Inject constructor(
     }
 
     fun shutdown() {
+        utteranceListener?.let { textToSpeech?.removeUtteranceProgressListener(it) }
         textToSpeech?.stop()
         textToSpeech?.shutdown()
         textToSpeech = null
+        utteranceListener = null
         _isInitialized.value = false
     }
 }

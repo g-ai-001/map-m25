@@ -6,6 +6,7 @@ import app.map_m25.domain.model.MapLocation
 import app.map_m25.domain.model.Route
 import app.map_m25.domain.model.RouteType
 import app.map_m25.domain.repository.LocationRepository
+import app.map_m25.util.DistanceUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,11 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 data class RouteUiState(
     val startLocation: MapLocation? = null,
@@ -77,7 +73,7 @@ class RouteViewModel @Inject constructor(
         val end = _uiState.value.endLocation
 
         if (start != null && end != null) {
-            val distance = calculateDistance(
+            val distance = DistanceUtils.calculateDistance(
                 start.latitude, start.longitude,
                 end.latitude, end.longitude
             )
@@ -92,17 +88,6 @@ class RouteViewModel @Inject constructor(
             )
             _uiState.value = _uiState.value.copy(route = route)
         }
-    }
-
-    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Float {
-        val earthRadius = 6371.0
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLon = Math.toRadians(lon2 - lon1)
-        val a = sin(dLat / 2).pow(2) +
-            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
-            sin(dLon / 2).pow(2)
-        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        return (earthRadius * c).toFloat()
     }
 
     private fun calculateDuration(distanceKm: Float, routeType: RouteType): Int {

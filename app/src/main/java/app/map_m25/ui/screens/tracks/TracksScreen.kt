@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.map_m25.domain.model.Track
+import app.map_m25.util.FormatUtils
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -251,8 +252,7 @@ private fun TrackItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (track.totalDistance >= 1) String.format("%.2f 公里", track.totalDistance)
-                           else String.format("%.0f 米", track.totalDistance * 1000),
+                    text = FormatUtils.formatDistanceChinese(track.totalDistance),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

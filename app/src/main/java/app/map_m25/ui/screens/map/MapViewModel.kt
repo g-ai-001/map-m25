@@ -11,18 +11,17 @@ import app.map_m25.domain.model.MapStyle
 import app.map_m25.domain.model.RouteType
 import app.map_m25.domain.repository.LocationRepository
 import app.map_m25.domain.repository.MarkerRepository
+import app.map_m25.util.DistanceUtils
+import app.map_m25.util.FormatUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 data class MapUiState(
     val currentLocation: MapLocation = MapLocation(
@@ -75,44 +74,38 @@ class MapViewModel @Inject constructor(
 
     private fun loadSettings() {
         viewModelScope.launch {
-            settingsDataStore.mapStyle.collect { style ->
-                _uiState.value = _uiState.value.copy(mapStyle = style)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.voiceEnabled.collect { enabled ->
-                _uiState.value = _uiState.value.copy(voiceEnabled = enabled)
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.showPoiLabels.collect { show ->
+            combine(
+                settingsDataStore.mapStyle,
+                settingsDataStore.voiceEnabled,
+                settingsDataStore.showPoiLabels,
+                settingsDataStore.showRoadNames,
+                settingsDataStore.showTrafficSigns,
+                settingsDataStore.showBuildingLabels
+            ) { style, voice, poi, roads, traffic, buildings ->
+                SettingsData(style, voice, poi, roads, traffic, buildings)
+            }.collect { settings ->
                 _uiState.value = _uiState.value.copy(
-                    displaySettings = _uiState.value.displaySettings.copy(showPoiLabels = show)
-                )
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.showRoadNames.collect { show ->
-                _uiState.value = _uiState.value.copy(
-                    displaySettings = _uiState.value.displaySettings.copy(showRoadNames = show)
-                )
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.showTrafficSigns.collect { show ->
-                _uiState.value = _uiState.value.copy(
-                    displaySettings = _uiState.value.displaySettings.copy(showTrafficSigns = show)
-                )
-            }
-        }
-        viewModelScope.launch {
-            settingsDataStore.showBuildingLabels.collect { show ->
-                _uiState.value = _uiState.value.copy(
-                    displaySettings = _uiState.value.displaySettings.copy(showBuildingLabels = show)
+                    mapStyle = settings.style,
+                    voiceEnabled = settings.voiceEnabled,
+                    displaySettings = MapDisplaySettings(
+                        showPoiLabels = settings.showPoiLabels,
+                        showRoadNames = settings.showRoadNames,
+                        showTrafficSigns = settings.showTrafficSigns,
+                        showBuildingLabels = settings.showBuildingLabels
+                    )
                 )
             }
         }
     }
+
+    private data class SettingsData(
+        val style: MapStyle,
+        val voice: Boolean,
+        val showPoiLabels: Boolean,
+        val showRoadNames: Boolean,
+        val showTrafficSigns: Boolean,
+        val showBuildingLabels: Boolean
+    )
 
     fun onMapClick(latitude: Double, longitude: Double) {
         viewModelScope.launch {
@@ -152,23 +145,12 @@ class MapViewModel @Inject constructor(
         if (points.size < 2) return 0f
         var total = 0f
         for (i in 0 until points.size - 1) {
-            total += calculateDistance(points[i], points[i + 1])
+            total += DistanceUtils.calculateDistance(
+                points[i].latitude, points[i].longitude,
+                points[i + 1].latitude, points[i + 1].longitude
+            )
         }
         return total
-    }
-
-    private fun calculateDistance(p1: MapLocation, p2: MapLocation): Float {
-        val r = 6371f
-        val lat1Rad = Math.toRadians(p1.latitude)
-        val lat2Rad = Math.toRadians(p2.latitude)
-        val deltaLat = Math.toRadians(p2.latitude - p1.latitude)
-        val deltaLng = Math.toRadians(p2.longitude - p1.longitude)
-        val sinDeltaLatHalf = kotlin.math.sin(deltaLat / 2).toFloat()
-        val a = sinDeltaLatHalf * sinDeltaLatHalf +
-                kotlin.math.cos(lat1Rad).toFloat() * kotlin.math.cos(lat2Rad).toFloat() *
-                kotlin.math.sin(deltaLng / 2).toFloat() * kotlin.math.sin(deltaLng / 2).toFloat()
-        val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a.toDouble()).toFloat(), kotlin.math.sqrt((1 - a).toDouble()).toFloat())
-        return r * c
     }
 
     fun onZoomChange(zoom: Float) {
@@ -368,11 +350,7 @@ class MapViewModel @Inject constructor(
     }
 
     private fun formatDistance(km: Float): String {
-        return if (km >= 1) {
-            String.format("%.1f公里", km)
-        } else {
-            String.format("%.0f米", km * 1000)
-        }
+        return FormatUtils.formatDistanceMetric(km)
     }
 
     private fun checkDeviation() {

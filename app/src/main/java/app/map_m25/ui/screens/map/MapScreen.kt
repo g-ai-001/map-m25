@@ -71,6 +71,7 @@ import app.map_m25.domain.model.MapLocation
 import app.map_m25.domain.model.MapMarker
 import app.map_m25.domain.model.MapStyle
 import app.map_m25.ui.theme.MapGreen
+import app.map_m25.util.FormatUtils
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -705,8 +706,7 @@ private fun MeasuringToolbar(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = if (totalDistance >= 1) String.format("%.2f 公里", totalDistance)
-                           else String.format("%.0f 米", totalDistance * 1000),
+                    text = FormatUtils.formatDistanceChinese(totalDistance),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

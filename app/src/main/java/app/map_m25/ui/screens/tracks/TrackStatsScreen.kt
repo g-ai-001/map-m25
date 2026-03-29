@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.map_m25.util.FormatUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +76,7 @@ fun TrackStatsScreen(
         ) {
             if (uiState.currentTrack != null) {
                 Text(
-                    text = uiState.currentTrack!!.name,
+                    text = uiState.currentTrack?.name ?: "未知轨迹",
                     style = MaterialTheme.typography.headlineMedium
                 )
 
@@ -89,7 +90,7 @@ fun TrackStatsScreen(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Straighten,
                         title = "总距离",
-                        value = formatDistance(statistics.totalDistance)
+                        value = FormatUtils.formatDistanceKm(statistics.totalDistance)
                     )
                     StatCard(
                         modifier = Modifier.weight(1f),
@@ -224,10 +225,6 @@ private fun DetailRow(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurface
         )
     }
-}
-
-private fun formatDistance(km: Float): String {
-    return if (km >= 1) String.format("%.2f km", km) else String.format("%.0f m", km * 1000)
 }
 
 private fun formatDuration(ms: Long): String {
