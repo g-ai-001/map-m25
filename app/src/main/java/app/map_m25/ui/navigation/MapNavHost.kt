@@ -8,11 +8,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.map_m25.ui.screens.favorites.FavoritesScreen
 import app.map_m25.ui.screens.history.HistoryScreen
+import app.map_m25.ui.screens.hotspots.HotSpotsScreen
 import app.map_m25.ui.screens.map.MapScreen
 import app.map_m25.ui.screens.markers.MarkersScreen
+import app.map_m25.ui.screens.offline.OfflineRegionsScreen
 import app.map_m25.ui.screens.route.RouteScreen
 import app.map_m25.ui.screens.search.SearchScreen
 import app.map_m25.ui.screens.settings.SettingsScreen
+import app.map_m25.ui.screens.snapshot.MapSnapshotsScreen
 import app.map_m25.ui.screens.export.ExportScreen
 import app.map_m25.ui.screens.tracks.TrackStatsScreen
 import app.map_m25.ui.screens.tracks.TracksScreen
@@ -60,7 +63,10 @@ fun MapNavHost(
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToHistory = { navController.navigate(Screen.History.route) },
-                onNavigateToExport = { navController.navigate(Screen.Export.route) }
+                onNavigateToExport = { navController.navigate(Screen.Export.route) },
+                onNavigateToOfflineRegions = { navController.navigate(Screen.OfflineRegions.route) },
+                onNavigateToHotSpots = { navController.navigate(Screen.HotSpots.route) },
+                onNavigateToSnapshots = { navController.navigate(Screen.MapSnapshots.route) }
             )
         }
         composable(Screen.Markers.route) {
@@ -88,6 +94,22 @@ fun MapNavHost(
         }
         composable(Screen.Export.route) {
             ExportScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.OfflineRegions.route) {
+            OfflineRegionsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.HotSpots.route) {
+            HotSpotsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onLocationClick = { _ -> navController.popBackStack() }
+            )
+        }
+        composable(Screen.MapSnapshots.route) {
+            MapSnapshotsScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

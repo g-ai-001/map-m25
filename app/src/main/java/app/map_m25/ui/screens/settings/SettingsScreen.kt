@@ -15,10 +15,13 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.HotTub
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.ScreenLockPortrait
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
@@ -62,6 +65,9 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHistory: () -> Unit,
     onNavigateToExport: () -> Unit,
+    onNavigateToOfflineRegions: () -> Unit = {},
+    onNavigateToHotSpots: () -> Unit = {},
+    onNavigateToSnapshots: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -219,6 +225,27 @@ fun SettingsScreen(
                     title = "数据导出",
                     description = "导出标记和轨迹数据",
                     onClick = onNavigateToExport
+                )
+                HorizontalDivider()
+                ClickableSettingItem(
+                    icon = Icons.Default.Download,
+                    title = "离线区域",
+                    description = "管理离线地图区域",
+                    onClick = onNavigateToOfflineRegions
+                )
+                HorizontalDivider()
+                ClickableSettingItem(
+                    icon = Icons.Default.HotTub,
+                    title = "热点推荐",
+                    description = "查看热门地点推荐",
+                    onClick = onNavigateToHotSpots
+                )
+                HorizontalDivider()
+                ClickableSettingItem(
+                    icon = Icons.Default.PhotoCamera,
+                    title = "地图快照",
+                    description = "查看已保存的地图截图",
+                    onClick = onNavigateToSnapshots
                 )
             }
 

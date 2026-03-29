@@ -13,4 +13,7 @@ sealed class Screen(val route: String) {
         fun createRoute(trackId: Long) = "track_stats/$trackId"
     }
     data object Export : Screen("export")
+    data object OfflineRegions : Screen("offline_regions")
+    data object HotSpots : Screen("hot_spots")
+    data object MapSnapshots : Screen("map_snapshots")
 }

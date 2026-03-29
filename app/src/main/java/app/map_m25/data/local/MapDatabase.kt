@@ -10,6 +10,7 @@ import app.map_m25.data.local.dao.TrackDao
 import app.map_m25.data.local.entity.LocationEntity
 import app.map_m25.data.local.entity.MarkerCategoryEntity
 import app.map_m25.data.local.entity.MarkerEntity
+import app.map_m25.data.local.entity.OfflineRegionEntity
 import app.map_m25.data.local.entity.SearchHistoryEntity
 import app.map_m25.data.local.entity.TrackEntity
 import app.map_m25.data.local.entity.TrackPointEntity
@@ -21,9 +22,10 @@ import app.map_m25.data.local.entity.TrackPointEntity
         MarkerEntity::class,
         MarkerCategoryEntity::class,
         TrackEntity::class,
-        TrackPointEntity::class
+        TrackPointEntity::class,
+        OfflineRegionEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class MapDatabase : RoomDatabase() {
@@ -32,4 +34,5 @@ abstract class MapDatabase : RoomDatabase() {
     abstract fun markerDao(): MarkerDao
     abstract fun markerCategoryDao(): MarkerCategoryDao
     abstract fun trackDao(): TrackDao
+    abstract fun offlineRegionDao(): OfflineRegionDao
 }

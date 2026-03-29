@@ -6,17 +6,20 @@ import app.map_m25.data.local.MapDatabase
 import app.map_m25.data.local.dao.LocationDao
 import app.map_m25.data.local.dao.MarkerCategoryDao
 import app.map_m25.data.local.dao.MarkerDao
+import app.map_m25.data.local.dao.OfflineRegionDao
 import app.map_m25.data.local.dao.SearchHistoryDao
 import app.map_m25.data.local.dao.TrackDao
 import app.map_m25.data.local.datastore.SettingsDataStore
 import app.map_m25.data.repository.LocationRepositoryImpl
 import app.map_m25.data.repository.MarkerCategoryRepositoryImpl
 import app.map_m25.data.repository.MarkerRepositoryImpl
+import app.map_m25.data.repository.OfflineRegionRepositoryImpl
 import app.map_m25.data.repository.SearchHistoryRepositoryImpl
 import app.map_m25.data.repository.TrackRepositoryImpl
 import app.map_m25.domain.repository.LocationRepository
 import app.map_m25.domain.repository.MarkerCategoryRepository
 import app.map_m25.domain.repository.MarkerRepository
+import app.map_m25.domain.repository.OfflineRegionRepository
 import app.map_m25.domain.repository.SearchHistoryRepository
 import app.map_m25.domain.repository.TrackRepository
 import dagger.Module
@@ -72,6 +75,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideOfflineRegionDao(database: MapDatabase): OfflineRegionDao {
+        return database.offlineRegionDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideSettingsDataStore(@ApplicationContext context: Context): SettingsDataStore {
         return SettingsDataStore(context)
     }
@@ -104,5 +113,11 @@ object AppModule {
     @Singleton
     fun provideTrackRepository(trackDao: TrackDao): TrackRepository {
         return TrackRepositoryImpl(trackDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOfflineRegionRepository(offlineRegionDao: OfflineRegionDao): OfflineRegionRepository {
+        return OfflineRegionRepositoryImpl(offlineRegionDao)
     }
 }
